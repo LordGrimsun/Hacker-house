@@ -154,6 +154,7 @@ export default function FraudInvestigationPlatform() {
         onOpenGsqlStudio={() => setIsGsqlOpen(true)}
         onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
         onOpenSAR={() => setIsSAROpen(true)}
+        onOpenMemory={() => setIsMemoryOpen(true)}
         onOpenExporter={() => setIsExporterOpen(true)}
         onOpenDocs={() => setIsDocsOpen(true)}
         isMobileOpen={isMobileSidebarOpen}
