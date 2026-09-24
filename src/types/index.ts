@@ -232,7 +232,9 @@ export type UserRole =
   | "Senior Fraud Operations Lead"
   | "Tier 1 Fraud Analyst"
   | "Bank Secrecy Act (BSA) Officer"
-  | "Risk Engineering Lead";
+  | "Risk Engineering Lead"
+  | "VP of Fraud Risk"
+  | "SecOps Incident Investigator";
 
 export interface UserProfile {
   id: string;
