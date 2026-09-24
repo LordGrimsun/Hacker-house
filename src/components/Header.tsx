@@ -135,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-slate-700">•</span>
           <span className="flex items-center gap-1.5">
             <span className="text-slate-500">Total Capital Monitored:</span>
-            <span className="font-mono font-bold text-amber-300">${totalAmountAtRisk.toLocaleString()} USD</span>
+            <span className="font-mono font-bold text-amber-300">Rs. {totalAmountAtRisk.toLocaleString("en-IN")}</span>
           </span>
         </div>
 

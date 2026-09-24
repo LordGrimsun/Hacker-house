@@ -39,7 +39,7 @@ export const InvestigationConsole: React.FC<InvestigationConsoleProps> = ({
             </div>
             <p className="text-[11px] text-slate-400">
               Transaction ID: <span className="font-mono text-slate-200">{currentCase.transaction.transactionId}</span> • Amount:{" "}
-              <span className="font-mono font-bold text-emerald-400">${currentCase.transaction.amountUSD.toLocaleString()}</span>
+              <span className="font-mono font-bold text-emerald-400">Rs. {currentCase.transaction.amountUSD.toLocaleString("en-IN")}</span>
             </p>
           </div>
         </div>

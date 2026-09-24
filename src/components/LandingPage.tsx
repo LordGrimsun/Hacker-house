@@ -213,32 +213,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 shadow-lg">
               <span className="text-[10px] font-mono uppercase text-slate-500 block">Capital Saved</span>
-              <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">$1.22M USD</span>
+              <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">Rs. 1.22 Cr</span>
               <span className="text-[11px] text-slate-400 mt-0.5 block">Zero False Lockouts</span>
             </div>
 
             <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 shadow-lg col-span-2 sm:col-span-1">
               <span className="text-[10px] font-mono uppercase text-slate-500 block">Regulatory Compliance</span>
-              <span className="text-xl font-bold font-mono text-purple-400 mt-1 block">FinCEN SAR</span>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">31 CFR 1020.320 XML</span>
+              <span className="text-xl font-bold font-mono text-purple-400 mt-1 block">FIU-IND / FinCEN</span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Automated Regulatory STR / SAR</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Demo Credentials & Quick 1-Click Login Section */}
+      {/* Authorized Credentials & Instant Role Access Section */}
       <section id="demo-access" className="py-12 px-4 lg:px-8 bg-slate-950/60 border-y border-slate-800/80">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>JUDGE &amp; EVALUATOR ACCESS PORTAL</span>
+              <span>OFFICIAL ACCESS &amp; EVALUATION PORTAL</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Test-Drive the Live Platform in Seconds
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
-              Use our pre-configured enterprise credentials below or select any of the four designated role personas to inspect the system immediately.
+              Use the authorized enterprise credentials below or select any of the four designated role personas to inspect the system immediately.
             </p>
           </div>
 
@@ -247,7 +247,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-4 h-4 text-orange-400" />
-                <span>Primary Test Credentials</span>
+                <span>Authorized Platform Credentials</span>
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                 Active Session Token
@@ -444,7 +444,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         {c.id}
                       </span>
                       <span className="text-xs font-mono font-bold text-white">
-                        ${c.transaction.amountUSD.toLocaleString()} USD
+                        Rs. {c.transaction.amountUSD.toLocaleString("en-IN")}
                       </span>
                     </div>
 

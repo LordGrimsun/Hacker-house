@@ -27,8 +27,8 @@ export const TeamManagementView: React.FC = () => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<UserRole>("Tier 1 Fraud Analyst");
   const [clearanceLevel, setClearanceLevel] = useState<"Level 1" | "Level 2" | "Level 3" | "Level 4">("Level 2");
-  const [region, setRegion] = useState("North America Hub");
-  const [phone, setPhone] = useState("+1 (555) 234-5678");
+  const [region, setRegion] = useState("National Fraud Center, Mumbai");
+  const [phone, setPhone] = useState("+91 98201 45892");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([
     "INVESTIGATE",
     "STEP_UP_CHALLENGE"
@@ -74,7 +74,7 @@ export const TeamManagementView: React.FC = () => {
     // Reset Form
     setName("");
     setEmail("");
-    setPhone("+1 (555) 234-5678");
+    setPhone("+91 98201 45892");
   };
 
   const handleRemoveMember = (id: string) => {
@@ -246,7 +246,7 @@ export const TeamManagementView: React.FC = () => {
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 019-2831"
+                    placeholder="+91 98201 45892"
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>

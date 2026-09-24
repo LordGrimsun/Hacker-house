@@ -131,7 +131,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBackToHome }) =
               className="text-[10px] text-orange-400 hover:text-orange-300 flex items-center gap-1 font-mono"
             >
               {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-              <span>{copied ? "Copied" : "Copy Demo Creds"}</span>
+              <span>{copied ? "Copied" : "Copy Access Key"}</span>
             </button>
           </div>
 

@@ -5,7 +5,7 @@ export const BENCHMARK_CASES: FraudCase[] = [
   {
     id: "CASE-BENCH-01",
     caseNumber: 1,
-    title: "Suspicious $4,850 Electronics Purchase via Unrecognized Device",
+    title: "Suspicious Rs. 4,850 Electronics Purchase via Unrecognized Device",
     status: "ACTION_RECOMMENDED",
     createdAt: "2026-08-02T14:22:10Z",
     updatedAt: "2026-08-02T14:28:45Z",
@@ -433,7 +433,7 @@ export const BENCHMARK_CASES: FraudCase[] = [
   {
     id: "CASE-BENCH-03",
     caseNumber: 3,
-    title: "High-Value $3,450 Hotel Reservation in London with IP Mismatch",
+    title: "High-Value Rs. 3,450 Hotel Reservation with IP Mismatch",
     status: "RESOLVED",
     createdAt: "2026-08-05T18:40:12Z",
     updatedAt: "2026-08-05T18:44:20Z",
@@ -618,7 +618,7 @@ export const BENCHMARK_CASES: FraudCase[] = [
   {
     id: "CASE-BENCH-04",
     caseNumber: 4,
-    title: "Rapid Mule Layering: $24,500 Incoming Wire Dispersed in 4 Smurf Transfers",
+    title: "Rapid Mule Layering: Rs. 24,500 Incoming Transfer Dispersed in 4 Smurf Accounts",
     status: "ACTION_RECOMMENDED",
     createdAt: "2026-08-07T11:05:00Z",
     updatedAt: "2026-08-07T11:14:30Z",
@@ -1216,10 +1216,10 @@ export const BENCHMARK_CASES: FraudCase[] = [
       totalAmountAtRiskUSD: 109820.00,
       primaryTypology: "Merchant Collusion & Triangulation",
       lawEnforcementCodes: ["TRIANGULATION_FRAUD", "FREIGHT_FORWARDING_EXPORT"],
-      summaryNarrative: "The subject merchant LuxeHome Direct operates a fraudulent triangulation scheme. Stolen payment cards are charged for high-end luxury goods which are routed through Miami freight forwarding entities for international re-export. Aggregated fraudulent transactions across the merchant terminal exceed $109,000 USD over 14 days.",
+      summaryNarrative: "The subject merchant LuxeHome Direct operates a fraudulent triangulation scheme. Stolen payment cards are charged for high-end luxury goods which are routed through Miami freight forwarding entities for international re-export. Aggregated fraudulent transactions across the merchant terminal exceed Rs. 1,09,000 over 14 days.",
       graphNexusDetails: "TigerGraph merchant analysis revealed 29 victim cardholders connected to single Miami freight forwarder address.",
       chronologyOfEvents: [
-        "16:18:00Z - $2,890 charge submitted",
+        "16:18:00Z - Rs. 2,890 charge submitted",
         "16:18:50Z - Graph reveals freight forwarder destination",
         "16:20:00Z - Cardholder SMS challenge dispatched",
         "16:22:15Z - Customer confirms theft",
@@ -1633,7 +1633,7 @@ ADDITIONAL_CASE_CONFIGS.forEach((cfg) => {
       totalAmountAtRiskUSD: cfg.amt,
       primaryTypology: cfg.typology,
       lawEnforcementCodes: [cfg.typology.toUpperCase().replace(/\s+/g, "_")],
-      summaryNarrative: `On August ${(cfg.num + 5)}, 2026, an unauthorized financial transaction of $${cfg.amt.toLocaleString()} USD was intercepted matching the typology '${cfg.typology}'. Graph analysis confirmed malicious nexus. Controlled evidence verification failed, and funds were preserved.`,
+      summaryNarrative: `On August ${(cfg.num + 5)}, 2026, an unauthorized financial transaction of Rs. ${cfg.amt.toLocaleString("en-IN")} was intercepted matching the typology '${cfg.typology}'. Graph analysis confirmed malicious nexus. Controlled evidence verification failed, and funds were preserved.`,
       graphNexusDetails: `TigerGraph community COMM-BENCH-${cfg.num} revealed anomalous cluster density.`,
       chronologyOfEvents: [
         "09:58:00Z - Suspicious transaction attempted",

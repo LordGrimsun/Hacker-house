@@ -90,7 +90,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3">
             <h3 className="text-2xl font-bold font-mono text-white">
-              ${totalExposure.toLocaleString()} USD
+              Rs. {totalExposure.toLocaleString("en-IN")}
             </h3>
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
               <span className="text-emerald-400 font-semibold">20 Official Cases</span>
@@ -109,7 +109,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3">
             <h3 className="text-2xl font-bold font-mono text-emerald-400">
-              ${fraudAmountSaved.toLocaleString()} USD
+              Rs. {fraudAmountSaved.toLocaleString("en-IN")}
             </h3>
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
               <span className="text-emerald-400 font-semibold">100% Interception</span>
@@ -203,7 +203,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     </div>
                     <p className="text-xs text-slate-400 line-clamp-1">{item.title}</p>
                     <div className="flex items-center space-x-3 text-[11px] text-slate-500 font-mono">
-                      <span>Amount: <b className="text-white">${item.transaction.amountUSD.toLocaleString()}</b></span>
+                      <span>Amount: <b className="text-white">Rs. {item.transaction.amountUSD.toLocaleString("en-IN")}</b></span>
                       <span>•</span>
                       <span>Bank Risk: <b className="text-amber-400">{(item.assessment.initialRiskScore * 100).toFixed(0)}%</b></span>
                       <span>•</span>

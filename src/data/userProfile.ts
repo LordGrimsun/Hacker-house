@@ -8,13 +8,13 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   clearanceLevel: "Level 4 (Executive & BSA)",
   badgeId: "BYTEME-TG-8819",
   department: "Financial Crimes & Graph Intelligence Unit",
-  region: "North America & EMEA Oversight",
-  phone: "+1 (415) 890-4412",
+  region: "National Cyber Cell & FIU-IND Hub, Mumbai",
+  phone: "+91 98201 45892",
   casesInvestigated: 418,
   sarFiledCount: 64,
   accuracyRate: 99.4,
   twoFactorEnabled: true,
-  lastLogin: "2026-09-24 09:45 UTC",
+  lastLogin: "2026-09-24 09:45 IST",
   apiTokens: [
     {
       id: "TOK-01",
@@ -26,8 +26,8 @@ export const INITIAL_USER_PROFILE: UserProfile = {
     },
     {
       id: "TOK-02",
-      name: "FinCEN BSA Direct XML Submitter",
-      prefix: "fincen_efile_***88",
+      name: "FIU-IND / FinCEN Regulatory XML Submitter",
+      prefix: "fiu_efile_***88",
       createdDate: "2026-08-15",
       expiresIn: "120 days",
       permissions: ["SAR_PREVIEW", "SAR_SUBMIT"]
@@ -36,14 +36,14 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   recentActivity: [
     {
       id: "ACT-01",
-      action: "Executed 3DS 2.0 Biometric Re-auth on London Hotel TXN",
+      action: "Executed 3DS 2.0 Biometric Re-auth on Rs. 3,450 International TXN",
       targetCaseId: "CASE-BENCH-03",
       timestamp: "12 mins ago",
       status: "SUCCESS"
     },
     {
       id: "ACT-02",
-      action: "Triggered Emergency Wire Clawback on $24,500 Mule Transfer",
+      action: "Triggered Emergency IMPS / Wire Clawback on Rs. 24,500 Mule Transfer",
       targetCaseId: "CASE-BENCH-04",
       timestamp: "38 mins ago",
       status: "FLAGGED"
@@ -57,7 +57,7 @@ export const INITIAL_USER_PROFILE: UserProfile = {
     },
     {
       id: "ACT-04",
-      action: "Approved FinCEN Suspicious Activity Report (SAR #001)",
+      action: "Approved FIU-IND Suspicious Activity Report (STR / SAR #001)",
       targetCaseId: "CASE-BENCH-01",
       timestamp: "3 hours ago",
       status: "SUCCESS"

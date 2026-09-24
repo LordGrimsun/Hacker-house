@@ -72,7 +72,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ cases }) => {
                 Capital Exposure Intercepted by Fraud Typology
               </h2>
             </div>
-            <span className="font-mono text-xs font-bold text-white">${totalCapital.toLocaleString()} Total</span>
+            <span className="font-mono text-xs font-bold text-white">Rs. {totalCapital.toLocaleString("en-IN")} Total</span>
           </div>
 
           <div className="space-y-3 text-xs">
@@ -88,7 +88,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ cases }) => {
                       <span>{typology}</span>
                     </span>
                     <span className="font-mono font-bold text-white">
-                      ${amount.toLocaleString()} ({percent}%)
+                      Rs. {amount.toLocaleString("en-IN")} ({percent}%)
                     </span>
                   </div>
                   <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">

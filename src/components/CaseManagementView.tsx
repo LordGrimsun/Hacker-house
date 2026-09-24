@@ -129,7 +129,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
               <tr>
                 <th className="py-3 px-4">Case ID</th>
                 <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">Amount (USD)</th>
+                <th className="py-3 px-4">Amount (INR)</th>
                 <th className="py-3 px-4">Typology</th>
                 <th className="py-3 px-4">Bank Risk</th>
                 <th className="py-3 px-4">Uncertainty</th>
@@ -155,7 +155,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                       <div className="text-[10px] text-slate-500 font-mono">KYC: {item.transaction.customer.kycTier}</div>
                     </td>
                     <td className="py-3.5 px-4 font-mono font-bold text-slate-200">
-                      ${item.transaction.amountUSD.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      Rs. {Math.round(item.transaction.amountUSD).toLocaleString("en-IN")}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${

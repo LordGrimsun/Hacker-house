@@ -112,7 +112,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       <span className="font-semibold text-slate-200 truncate">{c.title}</span>
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono">
-                      ${c.transaction.amountUSD.toLocaleString()} USD • {c.assessment.predictedTypology}
+                      Rs. {c.transaction.amountUSD.toLocaleString("en-IN")} • {c.assessment.predictedTypology}
                     </div>
                   </div>
                   <span className="text-[10px] text-cyan-400 font-mono shrink-0">Open &rarr;</span>

@@ -161,7 +161,7 @@ export const BenchmarkBatchRunner: React.FC<BenchmarkBatchRunnerProps> = ({
                 </div>
                 <h4 className="font-semibold text-white text-xs line-clamp-1 mb-1">{c.title}</h4>
                 <div className="text-[11px] text-slate-400 font-mono">
-                  ${c.transaction.amountUSD.toLocaleString()} USD • {c.transaction.customer.name}
+                  Rs. {c.transaction.amountUSD.toLocaleString("en-IN")} • {c.transaction.customer.name}
                 </div>
               </div>
 

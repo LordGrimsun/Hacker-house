@@ -117,31 +117,46 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center mx-auto text-orange-400">
                 <ShieldAlert className="w-6 h-6 animate-pulse" />
               </div>
-              <h4 className="text-sm font-bold text-white tracking-tight">Horizon National Bank</h4>
-              <p className="text-[10px] text-slate-400">Cardholder Security Verification</p>
+              <h4 className="text-sm font-bold text-white tracking-tight">HDFC Sentinel Security</h4>
+              <p className="text-[10px] text-slate-400">RBI Mandated 2FA Security Verification</p>
             </div>
 
             {/* Notification / Verification Card */}
             <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
               <div className="flex items-center space-x-2 text-[11px] font-semibold text-orange-400 border-b border-slate-800 pb-2">
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>Urgent Authorization Required</span>
+                <span>Urgent 2FA Authorization Required</span>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <div className="text-slate-400 text-[10px] uppercase font-mono">Amount Attempted:</div>
+              <div className="space-y-1.5 text-xs">
+                <div className="text-slate-400 text-[10px] uppercase font-mono">Transaction Attempt:</div>
                 <div className="text-xl font-bold font-mono text-white">
-                  ${txn.amountUSD.toLocaleString("en-US", { minimumFractionDigits: 2 })} USD
+                  Rs. {Math.round(txn.amountUSD).toLocaleString("en-IN")}
                 </div>
                 <div className="text-slate-300 text-xs">
                   Merchant: <span className="font-semibold text-white">{txn.merchant.merchantName}</span>
                 </div>
-                <div className="text-[11px] text-slate-400">
-                  Card: <span className="font-mono text-white">{txn.card.card4.toUpperCase()} •••• {txn.card.card1}</span>
+                <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                  <span>Card / UPI:</span>
+                  <span className="font-mono text-white font-semibold">•••• •••• {String(txn.card.card1).slice(-4)}</span>
                 </div>
+                <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                  <span>Registered Mobile:</span>
+                  <span className="font-mono text-emerald-400 font-semibold">+91 ••••• 45892</span>
+                </div>
+
+                {/* Validatable OTP Code Box */}
+                <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-1 mt-1">
+                  <span className="text-[10px] text-slate-500 font-mono uppercase block">Security Passcode (OTP):</span>
+                  <div className="text-base font-mono font-extrabold tracking-widest text-orange-400 bg-slate-900/80 py-1 px-2 rounded-lg border border-orange-500/30 inline-block">
+                    7 3 9 2 0 1
+                  </div>
+                  <span className="text-[9px] text-slate-500 block font-mono">Valid for 3 mins • Do not share</span>
+                </div>
+
                 {txn.device.geoMismatch && (
                   <div className="p-1.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[10px] font-mono">
-                    ⚠️ Detected location: Frankfurt, DE (Tor Exit)
+                    ⚠️ Detected IP: Mumbai Cyber Gateway (VPN / Proxy Flagged)
                   </div>
                 )}
               </div>
@@ -156,7 +171,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               <div className="py-4 text-center space-y-2 animate-fadeIn">
                 <Fingerprint className="w-12 h-12 text-emerald-400 animate-pulse mx-auto" />
                 <span className="text-xs font-mono font-bold text-emerald-300 block">
-                  FaceID / Secure Enclave Scanning...
+                  Verifying OTP &amp; Biometric Enclave...
                 </span>
               </div>
             )}
@@ -165,11 +180,11 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               <div className="py-3 text-center space-y-1.5 animate-fadeIn">
                 {completedState === "VERIFIED_LEGITIMATE" ? (
                   <div className="text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                    <CheckCircle2 className="w-5 h-5" /> Authenticated via FaceID
+                    <CheckCircle2 className="w-5 h-5" /> OTP &amp; FaceID Validated (Legitimate)
                   </div>
                 ) : (
                   <div className="text-rose-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                    <XCircle className="w-5 h-5" /> Fraud Confirmed &amp; Card Severed
+                    <XCircle className="w-5 h-5" /> Fraud Confirmed &amp; UPI / Card Frozen
                   </div>
                 )}
               </div>
@@ -183,7 +198,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
                   className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-1.5 transition-all active:scale-95"
                 >
                   <Fingerprint className="w-4 h-4" />
-                  <span>YES, I AUTHORIZE (Approve)</span>
+                  <span>VERIFY OTP &amp; APPROVE</span>
                 </button>
 
                 <button
@@ -191,14 +206,14 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
                   className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 flex items-center justify-center space-x-1.5 transition-all active:scale-95"
                 >
                   <XCircle className="w-4 h-4" />
-                  <span>NO! REPORT FRAUD &amp; LOCK</span>
+                  <span>REPORT FRAUD &amp; BLOCK UPI / CARD</span>
                 </button>
 
                 <button
                   onClick={handleGhost}
                   className="w-full py-1.5 text-[10px] text-slate-400 hover:text-slate-200 transition-colors text-center font-mono"
                 >
-                  Simulate: Timeout / No Response
+                  Simulate: OTP Expired / No Response
                 </button>
               </div>
             )}

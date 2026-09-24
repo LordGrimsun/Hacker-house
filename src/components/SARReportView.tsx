@@ -94,7 +94,7 @@ export const SARReportView: React.FC<SARReportViewProps> = ({
             <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800">
               <span className="text-[10px] text-slate-500 uppercase font-semibold">Total Amount at Risk:</span>
               <p className="font-mono font-bold text-rose-400 mt-0.5">
-                ${sarReport.totalAmountAtRiskUSD.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                Rs. {Math.round(sarReport.totalAmountAtRiskUSD).toLocaleString("en-IN")}
               </p>
             </div>
             <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800">

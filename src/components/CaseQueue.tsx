@@ -152,7 +152,7 @@ export const CaseQueue: React.FC<CaseQueueProps> = ({
                   {c.transaction.customer.name}
                 </span>
                 <span className="font-mono font-bold text-white">
-                  ${c.transaction.amountUSD.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  Rs. {Math.round(c.transaction.amountUSD).toLocaleString("en-IN")}
                 </span>
               </div>
 
