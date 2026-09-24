@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { NavigationTab, UserRole } from "@/types";
+import { soundManager } from "@/lib/audioEffects";
 import {
   ShieldAlert,
   LayoutDashboard,
@@ -17,7 +18,9 @@ import {
   Database,
   Download,
   Terminal,
-  Bell
+  Zap,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 
 interface NavbarProps {
@@ -40,11 +43,21 @@ export const Navbar: React.FC<NavbarProps> = ({
   totalCases,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const toggleMute = () => {
+    soundManager.isMuted = !soundManager.isMuted;
+    setIsMuted(soundManager.isMuted);
+    if (!soundManager.isMuted) {
+      soundManager.playBlip(900, 0.05);
+    }
+  };
 
   const navItems: { tab: NavigationTab; label: string; icon: any }[] = [
     { tab: "DASHBOARD", label: "Command Center", icon: LayoutDashboard },
     { tab: "INVESTIGATION", label: "Investigation Studio", icon: Cpu },
     { tab: "CASES", label: "Case Queue (20)", icon: Layers },
+    { tab: "BATCH_EVALUATION", label: "Benchmark Suite", icon: Zap },
     { tab: "ANALYTICS", label: "Fraud Intelligence", icon: BarChart3 },
     { tab: "TEAM", label: "Team & Roles", icon: Users },
     { tab: "PROFILE", label: "User Profile", icon: User },
@@ -52,6 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   const handleNavClick = (tab: NavigationTab) => {
+    soundManager.playBlip(750, 0.03);
     onSelectTab(tab);
     setMobileMenuOpen(false);
   };
@@ -62,7 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand & Team Name */}
         <div className="flex items-center space-x-3">
           <div
-            onClick={() => onSelectTab("DASHBOARD")}
+            onClick={() => handleNavClick("DASHBOARD")}
             className="flex items-center space-x-2.5 cursor-pointer group"
           >
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 via-tiger-500 to-amber-600 shadow-md shadow-orange-500/20 ring-1 ring-orange-400/40">
@@ -109,6 +123,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Actions & User Profile Badge */}
         <div className="flex items-center space-x-2.5">
+          {/* Cyber Audio Effects Toggle */}
+          <button
+            onClick={toggleMute}
+            className={`p-1.5 rounded-lg border text-xs transition-colors ${
+              isMuted
+                ? "bg-slate-900 border-slate-800 text-slate-500"
+                : "bg-orange-500/10 border-orange-500/30 text-orange-400"
+            }`}
+            title={isMuted ? "Unmute Audio" : "Mute Cyber Audio Effects"}
+          >
+            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </button>
+
           {/* Fast GSQL query studio */}
           <button
             onClick={onOpenGsqlStudio}
@@ -131,7 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* User Profile Pill */}
           <div
-            onClick={() => onSelectTab("PROFILE")}
+            onClick={() => handleNavClick("PROFILE")}
             className="flex items-center space-x-2 px-2.5 py-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 cursor-pointer transition-colors"
           >
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-bold text-[11px] text-white">

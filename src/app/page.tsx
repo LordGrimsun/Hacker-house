@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import { BENCHMARK_CASES } from "@/data/benchmarkCases";
 import { FraudCase, NavigationTab, UserRole } from "@/types";
 import { AgentInvestigationEngine } from "@/lib/agentEngine";
+import { soundManager } from "@/lib/audioEffects";
 import { LoginPage } from "@/components/LoginPage";
 import { Navbar } from "@/components/Navbar";
 import { DashboardOverview } from "@/components/DashboardOverview";
 import { CaseManagementView } from "@/components/CaseManagementView";
+import { BenchmarkBatchRunner } from "@/components/BenchmarkBatchRunner";
 import { AnalyticsView } from "@/components/AnalyticsView";
 import { TeamManagementView } from "@/components/TeamManagementView";
 import { UserProfileView } from "@/components/UserProfileView";
@@ -17,6 +19,8 @@ import { GraphVisualizer } from "@/components/GraphVisualizer";
 import { InvestigationConsole } from "@/components/InvestigationConsole";
 import { ControlledEvidenceGatherer } from "@/components/ControlledEvidenceGatherer";
 import { ActionApprovalCard } from "@/components/ActionApprovalCard";
+import { MultiAgentDebate } from "@/components/MultiAgentDebate";
+import { PhoneSimulator } from "@/components/PhoneSimulator";
 import { SARReportView } from "@/components/SARReportView";
 import { GSQLStudio } from "@/components/GSQLStudio";
 import { CaseMemoryView } from "@/components/CaseMemoryView";
@@ -49,12 +53,14 @@ export default function FraudInvestigationPlatform() {
   const [isMemoryOpen, setIsMemoryOpen] = useState(false);
   const [isExporterOpen, setIsExporterOpen] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isPhoneSimulatorOpen, setIsPhoneSimulatorOpen] = useState(false);
 
   // TigerGraph Config
   const [tgConfig, setTgConfig] = useState<TigerGraphConfig>(DEFAULT_TIGERGRAPH_CONFIG);
 
   // Handle Login
   const handleLogin = (user: { name: string; email: string; role: UserRole }) => {
+    soundManager.playSuccess();
     setCurrentUser(user);
     setIsLoggedIn(true);
     setActiveTab("DASHBOARD");
@@ -62,11 +68,13 @@ export default function FraudInvestigationPlatform() {
 
   // Handle Logout
   const handleLogout = () => {
+    soundManager.playBlip(400, 0.08);
     setIsLoggedIn(false);
   };
 
   // Select case and jump into the investigation studio
   const handleSelectCaseAndInvestigate = (caseItem: FraudCase) => {
+    soundManager.playBlip(800, 0.04);
     setSelectedCaseId(caseItem.id);
     setActiveTab("INVESTIGATION");
   };
@@ -117,7 +125,10 @@ export default function FraudInvestigationPlatform() {
             <CaseQueue
               cases={casesList}
               selectedCaseId={selectedCaseId}
-              onSelectCase={(c) => setSelectedCaseId(c.id)}
+              onSelectCase={(c) => {
+                soundManager.playBlip(750, 0.03);
+                setSelectedCaseId(c.id);
+              }}
             />
 
             {/* Investigation Studio Workspace */}
@@ -139,7 +150,7 @@ export default function FraudInvestigationPlatform() {
                 </div>
               </div>
 
-              {/* Bottom Row: NBA Comparison Before vs After Evidence + Interactive Simulator */}
+              {/* Middle Row: Side-by-Side NBA Comparison + Controlled Evidence Simulator */}
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
                 <div className="xl:col-span-7">
                   <ActionApprovalCard currentCase={currentCase} />
@@ -149,8 +160,14 @@ export default function FraudInvestigationPlatform() {
                     evidence={currentCase.controlledEvidence}
                     currentCase={currentCase}
                     onSimulateOutcome={handleSimulateEvidenceOutcome}
+                    onOpenPhoneSimulator={() => setIsPhoneSimulatorOpen(true)}
                   />
                 </div>
+              </div>
+
+              {/* Bottom Row: Multi-Agent Consensus Swarm Debate */}
+              <div>
+                <MultiAgentDebate currentCase={currentCase} />
               </div>
             </main>
           </div>
@@ -159,6 +176,16 @@ export default function FraudInvestigationPlatform() {
         {activeTab === "CASES" && (
           <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
             <CaseManagementView
+              cases={casesList}
+              onSelectCaseAndInvestigate={handleSelectCaseAndInvestigate}
+              onOpenExporter={() => setIsExporterOpen(true)}
+            />
+          </main>
+        )}
+
+        {activeTab === "BATCH_EVALUATION" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <BenchmarkBatchRunner
               cases={casesList}
               onSelectCaseAndInvestigate={handleSelectCaseAndInvestigate}
               onOpenExporter={() => setIsExporterOpen(true)}
@@ -193,6 +220,14 @@ export default function FraudInvestigationPlatform() {
           </main>
         )}
       </div>
+
+      {/* Global Interactive Smartphone Simulator */}
+      <PhoneSimulator
+        currentCase={currentCase}
+        isOpen={isPhoneSimulatorOpen}
+        onClose={() => setIsPhoneSimulatorOpen(false)}
+        onSimulateOutcome={handleSimulateEvidenceOutcome}
+      />
 
       {/* Global Modals */}
       <SARReportView

@@ -2,26 +2,47 @@
 
 import React, { useState } from "react";
 import { ControlledEvidenceAction, FraudCase } from "@/types";
-import { MessageSquareText, Fingerprint, PhoneCall, ShieldAlert, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { soundManager } from "@/lib/audioEffects";
+import {
+  MessageSquareText,
+  Fingerprint,
+  PhoneCall,
+  ShieldAlert,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Smartphone,
+  Sparkles
+} from "lucide-react";
 
 interface ControlledEvidenceGathererProps {
   evidence: ControlledEvidenceAction;
   currentCase: FraudCase;
   onSimulateOutcome: (outcome: "CONFIRMED_FRAUD" | "VERIFIED_LEGITIMATE" | "FAILED_CHALLENGE") => void;
+  onOpenPhoneSimulator?: () => void;
 }
 
 export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProps> = ({
   evidence,
   currentCase,
   onSimulateOutcome,
+  onOpenPhoneSimulator,
 }) => {
   const [isSimulating, setIsSimulating] = useState(false);
 
   const handleSimulate = (outcome: "CONFIRMED_FRAUD" | "VERIFIED_LEGITIMATE" | "FAILED_CHALLENGE") => {
     setIsSimulating(true);
+    soundManager.playBlip(700, 0.05);
+
     setTimeout(() => {
       onSimulateOutcome(outcome);
       setIsSimulating(false);
+      if (outcome === "VERIFIED_LEGITIMATE") {
+        soundManager.playSuccess();
+      } else {
+        soundManager.playAlert();
+      }
     }, 400);
   };
 
@@ -61,13 +82,15 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
           </div>
         </div>
 
-        <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-semibold border ${
-          evidence.status === "RECEIVED"
-            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-            : "bg-amber-500/10 text-amber-400 border-amber-500/30"
-        }`}>
-          Status: {evidence.status}
-        </span>
+        {onOpenPhoneSimulator && (
+          <button
+            onClick={onOpenPhoneSimulator}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 border border-orange-500/40 text-xs font-bold transition-all hover:scale-[1.02] shadow-sm"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Launch Phone Simulator</span>
+          </button>
+        )}
       </div>
 
       {/* Description & Requested Details */}
@@ -79,7 +102,7 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
         </div>
       </div>
 
-      {/* Outcome Banner if already received */}
+      {/* Outcome Banner */}
       {outcome && (
         <div className={`p-3 rounded-xl border text-xs space-y-1.5 ${
           outcome.result === "VERIFIED_LEGITIMATE"
@@ -110,7 +133,7 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
       {/* Interactive Simulation Action Buttons */}
       <div className="pt-2 border-t border-slate-800/80">
         <span className="text-[11px] font-semibold text-slate-400 block mb-2">
-          Interactive Evaluation Simulator (Test Agent Next-Best Action Adaptability):
+          Test Agent Next-Best Action Adaptability (Quick Simulation):
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
           <button
@@ -119,7 +142,7 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
             className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-            <span>Simulate: Confirm Fraud</span>
+            <span>Confirm Fraud (Report Theft)</span>
           </button>
 
           <button
@@ -128,7 +151,7 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
             className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Simulate: Customer Approves</span>
+            <span>Verify Legitimate (FaceID)</span>
           </button>
 
           <button
@@ -137,7 +160,7 @@ export const ControlledEvidenceGatherer: React.FC<ControlledEvidenceGathererProp
             className="flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 font-semibold transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${isSimulating ? "animate-spin" : ""}`} />
-            <span>Simulate: Spoof / Failed Challenge</span>
+            <span>Failed Challenge / Spoof</span>
           </button>
         </div>
       </div>

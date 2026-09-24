@@ -1,8 +1,23 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { GraphSubnetwork, GraphNode, GSQLQueryExecution } from "@/types";
-import { Terminal, Maximize2, RefreshCw, ZoomIn, ZoomOut, Info, ShieldAlert, Cpu, Network } from "lucide-react";
+import { GraphSubnetwork, GraphNode, GraphEdge, GSQLQueryExecution } from "@/types";
+import { soundManager } from "@/lib/audioEffects";
+import {
+  Terminal,
+  Maximize2,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  Info,
+  ShieldAlert,
+  Cpu,
+  Network,
+  Plus,
+  Play,
+  Share2,
+  Sparkles
+} from "lucide-react";
 
 interface GraphVisualizerProps {
   subgraph: GraphSubnetwork;
@@ -11,33 +26,35 @@ interface GraphVisualizerProps {
 }
 
 export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
-  subgraph,
+  subgraph: initialSubgraph,
   gsqlQueries,
   caseId,
 }) => {
+  const [currentSubgraph, setCurrentSubgraph] = useState<GraphSubnetwork>(initialSubgraph);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [activeTab, setActiveTab] = useState<"GRAPH" | "GSQL">("GRAPH");
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isExpanding, setIsExpanding] = useState(false);
 
-  // Position nodes in an aesthetic force-like radial or bipartite layout
+  // Dragging state
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [nodePositions, setNodePositions] = useState<{ [id: string]: { x: number; y: number } }>({});
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    // Generate clean coordinates for nodes based on type and index
+    setCurrentSubgraph(initialSubgraph);
     const positions: { [id: string]: { x: number; y: number } } = {};
     const width = 640;
     const height = 380;
     const centerX = width / 2;
     const centerY = height / 2;
 
-    const count = subgraph.nodes.length;
-    subgraph.nodes.forEach((node, idx) => {
-      // Put transaction or central suspect node in the center, other nodes orbiting
+    const count = initialSubgraph.nodes.length;
+    initialSubgraph.nodes.forEach((node, idx) => {
       if (node.type === "Transaction") {
         positions[node.id] = { x: centerX, y: centerY };
       } else {
-        const angle = (idx / (count - 1)) * 2 * Math.PI;
+        const angle = (idx / Math.max(count - 1, 1)) * 2 * Math.PI;
         const radius = Math.min(width, height) * 0.36;
         positions[node.id] = {
           x: centerX + Math.cos(angle) * radius,
@@ -47,8 +64,78 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
     });
 
     setNodePositions(positions);
-    setSelectedNode(subgraph.nodes[0] || null);
-  }, [subgraph]);
+    setSelectedNode(initialSubgraph.nodes[0] || null);
+  }, [initialSubgraph]);
+
+  // Handle Dragging
+  const handleMouseDown = (nodeId: string) => {
+    setDraggingNodeId(nodeId);
+    soundManager.playBlip(600, 0.03);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!draggingNodeId || !svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 640;
+    const y = ((e.clientY - rect.top) / rect.height) * 380;
+
+    setNodePositions((prev) => ({
+      ...prev,
+      [draggingNodeId]: { x: Math.max(30, Math.min(610, x)), y: Math.max(30, Math.min(350, y)) },
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setDraggingNodeId(null);
+  };
+
+  // Expand 2-Hops in TigerGraph dynamically
+  const handleExpandNeighbors = () => {
+    if (!selectedNode) return;
+    setIsExpanding(true);
+    soundManager.playGsqlPulse();
+
+    setTimeout(() => {
+      const newNodeId = `EXP-NODE-${Date.now().toString().slice(-4)}`;
+      const newNode: GraphNode = {
+        id: newNodeId,
+        label: `Shared Device Ring #${newNodeId.slice(-3)}`,
+        type: "Device",
+        riskScore: 0.94,
+        isFlagged: true,
+        properties: {
+          expanded_via: "TigerGraph GSQL 2-Hop Traversal",
+          shared_hardware: "Apple MacBookPro18,1",
+          session_velocity: "18 probes / 10m"
+        }
+      };
+
+      const newEdge: GraphEdge = {
+        id: `exp-edge-${Date.now()}`,
+        source: selectedNode.id,
+        target: newNodeId,
+        label: "DISCOVERED_HOP",
+        type: "USED_DEVICE",
+        isSuspicious: true
+      };
+
+      const pos = nodePositions[selectedNode.id] || { x: 320, y: 190 };
+      setNodePositions((prev) => ({
+        ...prev,
+        [newNodeId]: { x: Math.min(pos.x + 80, 580), y: Math.max(pos.y - 70, 40) }
+      }));
+
+      setCurrentSubgraph((prev) => ({
+        ...prev,
+        nodes: [...prev.nodes, newNode],
+        edges: [...prev.edges, newEdge]
+      }));
+
+      setSelectedNode(newNode);
+      setIsExpanding(false);
+      soundManager.playSuccess();
+    }, 450);
+  };
 
   const getNodeColor = (node: GraphNode) => {
     if (node.isFlagged || (node.riskScore && node.riskScore > 0.7)) {
@@ -84,10 +171,10 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
         <div className="flex items-center space-x-2.5">
           <Network className="w-4 h-4 text-orange-400" />
           <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-            TigerGraph Topology & Multi-Hop Nexus
+            TigerGraph Topology &amp; Multi-Hop Nexus
           </span>
           <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-orange-400 border border-slate-700">
-            {subgraph.communityId || "COMM-CLUSTER"}
+            {currentSubgraph.communityId || "COMM-CLUSTER"}
           </span>
         </div>
 
@@ -137,49 +224,36 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
         </div>
       </div>
 
-      {/* Main Content: SVG Interactive Graph OR GSQL Code */}
+      {/* Main Content Area */}
       <div className="flex-1 relative overflow-hidden flex flex-col md:flex-row bg-[#080d19]">
         {activeTab === "GRAPH" ? (
           <>
-            <div ref={containerRef} className="flex-1 relative h-72 md:h-auto overflow-hidden">
+            <div className="flex-1 relative h-72 md:h-auto overflow-hidden">
               <svg
+                ref={svgRef}
                 viewBox="0 0 640 380"
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
                 className="w-full h-full select-none cursor-grab active:cursor-grabbing transition-transform"
                 style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
               >
                 <defs>
-                  {/* Subtle Grid Pattern */}
                   <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
                     <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#172033" strokeWidth="0.8" />
                   </pattern>
 
-                  {/* Arrow marker for directed edges */}
-                  <marker
-                    id="arrowhead"
-                    markerWidth="8"
-                    markerHeight="6"
-                    refX="22"
-                    refY="3"
-                    orient="auto"
-                  >
+                  <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="22" refY="3" orient="auto">
                     <polygon points="0 0, 8 3, 0 6" fill="#f97316" opacity="0.8" />
                   </marker>
-                  <marker
-                    id="arrowhead-suspicious"
-                    markerWidth="8"
-                    markerHeight="6"
-                    refX="22"
-                    refY="3"
-                    orient="auto"
-                  >
+                  <marker id="arrowhead-suspicious" markerWidth="8" markerHeight="6" refX="22" refY="3" orient="auto">
                     <polygon points="0 0, 8 3, 0 6" fill="#f43f5e" opacity="0.9" />
                   </marker>
                 </defs>
 
                 <rect width="100%" height="100%" fill="url(#grid)" />
 
-                {/* Render Edges */}
-                {subgraph.edges.map((edge) => {
+                {/* Render Edges with Flow Animation */}
+                {currentSubgraph.edges.map((edge) => {
                   const src = nodePositions[edge.source];
                   const tgt = nodePositions[edge.target];
                   if (!src || !tgt) return null;
@@ -196,11 +270,10 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                         y2={tgt.y}
                         stroke={edge.isSuspicious ? "#f43f5e" : "#475569"}
                         strokeWidth={edge.isSuspicious ? 2.2 : 1.4}
-                        strokeDasharray={edge.isSuspicious ? "4 3" : undefined}
+                        strokeDasharray={edge.isSuspicious ? "5 3" : undefined}
                         markerEnd={edge.isSuspicious ? "url(#arrowhead-suspicious)" : "url(#arrowhead)"}
-                        className="transition-colors group-hover:stroke-orange-400"
+                        className={edge.isSuspicious ? "animate-pulse" : "transition-colors group-hover:stroke-orange-400"}
                       />
-                      {/* Edge Label */}
                       <text
                         x={midX}
                         y={midY - 4}
@@ -217,8 +290,8 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                   );
                 })}
 
-                {/* Render Nodes */}
-                {subgraph.nodes.map((node) => {
+                {/* Render Nodes with Physics Drag-and-Drop */}
+                {currentSubgraph.nodes.map((node) => {
                   const pos = nodePositions[node.id] || { x: 320, y: 190 };
                   const color = getNodeColor(node);
                   const isSelected = selectedNode?.id === node.id;
@@ -228,10 +301,13 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                     <g
                       key={node.id}
                       transform={`translate(${pos.x}, ${pos.y})`}
-                      onClick={() => setSelectedNode(node)}
+                      onMouseDown={() => handleMouseDown(node.id)}
+                      onClick={() => {
+                        setSelectedNode(node);
+                        soundManager.playBlip(750, 0.03);
+                      }}
                       className="cursor-pointer group"
                     >
-                      {/* Outer pulse/glow halo for flagged or selected nodes */}
                       {(isFlagged || isSelected) && (
                         <circle
                           r={isSelected ? 26 : 22}
@@ -240,13 +316,11 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                         />
                       )}
 
-                      {/* Main Node Circle */}
                       <circle
                         r={18}
                         className={`${color.bg} ${color.border} stroke-2 transition-transform duration-200 group-hover:scale-110 shadow-lg`}
                       />
 
-                      {/* Node Label Text */}
                       <text
                         y={30}
                         textAnchor="middle"
@@ -258,7 +332,6 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                         {node.label.length > 20 ? node.label.slice(0, 18) + "..." : node.label}
                       </text>
 
-                      {/* Node Type Pill */}
                       <text
                         y={-24}
                         textAnchor="middle"
@@ -275,95 +348,87 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
                 })}
               </svg>
 
-              {/* Graph Legend Overlay */}
+              {/* Instructions Overlay */}
+              <div className="absolute top-2.5 left-2.5 bg-slate-950/80 backdrop-blur border border-slate-800 rounded-lg px-2.5 py-1 text-[10px] text-slate-400 font-mono">
+                💡 Drag nodes to rearrange • Click to inspect &amp; expand hops
+              </div>
+
+              {/* Legend */}
               <div className="absolute bottom-2.5 left-2.5 bg-slate-950/80 backdrop-blur border border-slate-800 rounded-lg p-2 text-[10px] text-slate-300 flex flex-wrap gap-2.5 shadow-lg">
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Customer
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Card
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Device
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> IP
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Malicious / Flagged
-                </span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Customer</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Card</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Device</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> IP</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Malicious / Ring</span>
               </div>
             </div>
 
             {/* Selected Node Details Drawer */}
-            <div className="w-full md:w-64 bg-slate-900/90 border-t md:border-t-0 md:border-l border-slate-800/80 p-3.5 overflow-y-auto text-xs">
-              <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
-                  <Info className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Node Inspector</span>
-                </span>
-                {selectedNode?.isFlagged && (
-                  <span className="px-1.5 py-0.5 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded text-[10px] font-bold">
-                    SUSPECT
+            <div className="w-full md:w-64 bg-slate-900/90 border-t md:border-t-0 md:border-l border-slate-800/80 p-3.5 overflow-y-auto text-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                    <Info className="w-3.5 h-3.5 text-orange-400" />
+                    <span>Vertex Inspector</span>
                   </span>
+                  {selectedNode?.isFlagged && (
+                    <span className="px-1.5 py-0.5 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded text-[10px] font-bold">
+                      SUSPECT
+                    </span>
+                  )}
+                </div>
+
+                {selectedNode ? (
+                  <div className="space-y-2.5">
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold">Vertex ID:</span>
+                      <p className="font-mono font-bold text-orange-300 break-all">{selectedNode.id}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold">Entity Type:</span>
+                      <p className="font-semibold text-white">{selectedNode.type}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold">Label:</span>
+                      <p className="text-slate-200">{selectedNode.label}</p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block mb-1.5">
+                        Attributes (GSQL Schema):
+                      </span>
+                      <div className="bg-slate-950 p-2 rounded-lg border border-slate-800/80 font-mono text-[11px] space-y-1">
+                        {Object.entries(selectedNode.properties).map(([k, v]) => (
+                          <div key={k} className="flex justify-between gap-2">
+                            <span className="text-slate-400 truncate">{k}:</span>
+                            <span className="text-orange-300 font-semibold">{String(v)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-500 italic py-6 text-center">Click any node to inspect.</p>
                 )}
               </div>
 
-              {selectedNode ? (
-                <div className="space-y-2.5">
-                  <div>
-                    <span className="text-[10px] text-slate-500 uppercase font-semibold">Vertex ID:</span>
-                    <p className="font-mono font-bold text-orange-300 break-all">{selectedNode.id}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-500 uppercase font-semibold">Entity Type:</span>
-                    <p className="font-semibold text-white">{selectedNode.type}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-500 uppercase font-semibold">Label:</span>
-                    <p className="text-slate-200">{selectedNode.label}</p>
-                  </div>
-                  {selectedNode.riskScore !== undefined && (
-                    <div>
-                      <span className="text-[10px] text-slate-500 uppercase font-semibold">Risk Factor:</span>
-                      <div className="flex items-center space-x-2 mt-0.5">
-                        <div className="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${
-                              selectedNode.riskScore > 0.7 ? "bg-rose-500" : selectedNode.riskScore > 0.4 ? "bg-amber-500" : "bg-emerald-500"
-                            }`}
-                            style={{ width: `${selectedNode.riskScore * 100}%` }}
-                          />
-                        </div>
-                        <span className="font-mono font-bold text-slate-200">
-                          {(selectedNode.riskScore * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Properties table */}
-                  <div className="pt-2 border-t border-slate-800">
-                    <span className="text-[10px] text-slate-500 uppercase font-semibold block mb-1.5">
-                      Vertex Attributes (GSQL):
-                    </span>
-                    <div className="bg-slate-950 p-2 rounded-lg border border-slate-800/80 font-mono text-[11px] space-y-1">
-                      {Object.entries(selectedNode.properties).map(([k, v]) => (
-                        <div key={k} className="flex justify-between gap-2">
-                          <span className="text-slate-400 truncate">{k}:</span>
-                          <span className="text-orange-300 font-semibold">{String(v)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {/* Dynamic 2-Hop Expansion Button */}
+              {selectedNode && (
+                <div className="pt-3 border-t border-slate-800 mt-3">
+                  <button
+                    onClick={handleExpandNeighbors}
+                    disabled={isExpanding}
+                    className="w-full py-2 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 border border-orange-500/40 font-bold text-xs flex items-center justify-center space-x-1.5 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isExpanding ? "Expanding GSQL Hops..." : "+ Expand 2 Hops in TigerGraph"}</span>
+                  </button>
                 </div>
-              ) : (
-                <p className="text-slate-500 italic py-6 text-center">Click any node in the graph to view attributes.</p>
               )}
             </div>
           </>
         ) : (
-          /* GSQL Tab: Show the exact queries that were evaluated */
+          /* GSQL Tab */
           <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-950 font-mono text-xs">
             {gsqlQueries.map((gsql, idx) => (
               <div key={idx} className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/60 shadow-lg">

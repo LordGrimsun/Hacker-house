@@ -305,6 +305,7 @@ export type NavigationTab =
   | "DASHBOARD"
   | "INVESTIGATION"
   | "CASES"
+  | "BATCH_EVALUATION"
   | "ANALYTICS"
   | "TEAM"
   | "PROFILE"
