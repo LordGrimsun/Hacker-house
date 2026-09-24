@@ -2,9 +2,16 @@
 
 import React, { useState } from "react";
 import { BENCHMARK_CASES } from "@/data/benchmarkCases";
-import { FraudCase } from "@/types";
+import { FraudCase, NavigationTab, UserRole } from "@/types";
 import { AgentInvestigationEngine } from "@/lib/agentEngine";
-import { Header } from "@/components/Header";
+import { LoginPage } from "@/components/LoginPage";
+import { Navbar } from "@/components/Navbar";
+import { DashboardOverview } from "@/components/DashboardOverview";
+import { CaseManagementView } from "@/components/CaseManagementView";
+import { AnalyticsView } from "@/components/AnalyticsView";
+import { TeamManagementView } from "@/components/TeamManagementView";
+import { UserProfileView } from "@/components/UserProfileView";
+import { SettingsView } from "@/components/SettingsView";
 import { CaseQueue } from "@/components/CaseQueue";
 import { GraphVisualizer } from "@/components/GraphVisualizer";
 import { InvestigationConsole } from "@/components/InvestigationConsole";
@@ -13,110 +20,181 @@ import { ActionApprovalCard } from "@/components/ActionApprovalCard";
 import { SARReportView } from "@/components/SARReportView";
 import { GSQLStudio } from "@/components/GSQLStudio";
 import { CaseMemoryView } from "@/components/CaseMemoryView";
-import { ConnectionSettingsModal } from "@/components/ConnectionSettingsModal";
 import { BenchmarkExporter } from "@/components/BenchmarkExporter";
 import { DocumentationModal } from "@/components/DocumentationModal";
 import { DEFAULT_TIGERGRAPH_CONFIG, TigerGraphConfig } from "@/lib/tigergraph";
 
-export default function FraudInvestigationDashboard() {
-  // State for cases & selection
+export default function FraudInvestigationPlatform() {
+  // Authentication State
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; role: UserRole }>({
+    name: "Marcus Vance, CAMS",
+    email: "analyst@byteme.ai",
+    role: "Lead Fraud Architect"
+  });
+
+  // Active Navigation Tab
+  const [activeTab, setActiveTab] = useState<NavigationTab>("DASHBOARD");
+
+  // Cases List & Selection
   const [casesList, setCasesList] = useState<FraudCase[]>(BENCHMARK_CASES);
   const [selectedCaseId, setSelectedCaseId] = useState<string>(BENCHMARK_CASES[0].id);
 
   // Active case object
   const currentCase = casesList.find((c) => c.id === selectedCaseId) || casesList[0];
 
-  // Modals state
+  // Modals
   const [isSAROpen, setIsSAROpen] = useState(false);
   const [isGsqlOpen, setIsGsqlOpen] = useState(false);
   const [isMemoryOpen, setIsMemoryOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExporterOpen, setIsExporterOpen] = useState(false);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
 
-  // TigerGraph config
+  // TigerGraph Config
   const [tgConfig, setTgConfig] = useState<TigerGraphConfig>(DEFAULT_TIGERGRAPH_CONFIG);
 
-  // Handler for case selection
-  const handleSelectCase = (caseItem: FraudCase) => {
-    setSelectedCaseId(caseItem.id);
+  // Handle Login
+  const handleLogin = (user: { name: string; email: string; role: UserRole }) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    setActiveTab("DASHBOARD");
   };
 
-  // Handler for simulating controlled evidence feedback
+  // Handle Logout
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
+  // Select case and jump into the investigation studio
+  const handleSelectCaseAndInvestigate = (caseItem: FraudCase) => {
+    setSelectedCaseId(caseItem.id);
+    setActiveTab("INVESTIGATION");
+  };
+
+  // Simulate controlled evidence outcome
   const handleSimulateEvidenceOutcome = (
     outcome: "CONFIRMED_FRAUD" | "VERIFIED_LEGITIMATE" | "FAILED_CHALLENGE"
   ) => {
     const updated = AgentInvestigationEngine.simulateControlledEvidenceResponse(currentCase, outcome);
-
-    // Update in casesList
     setCasesList((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
   };
 
+  // If not logged in, show the sleek enterprise login portal
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#070b14] text-slate-100">
-      {/* Global Header */}
-      <Header
-        cases={casesList}
-        selectedCase={currentCase}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+    <div className="min-h-screen flex flex-col bg-[#060911] text-slate-100">
+      {/* Global Top Navbar */}
+      <Navbar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        currentUser={currentUser}
+        onLogout={handleLogout}
         onOpenGsqlStudio={() => setIsGsqlOpen(true)}
-        onOpenMemoryBank={() => setIsMemoryOpen(true)}
         onOpenExporter={() => setIsExporterOpen(true)}
-        onOpenDocs={() => setIsDocsOpen(true)}
-        isConnectedLive={tgConfig.useLiveConnection}
+        totalCases={casesList.length}
       />
 
-      {/* Main Workspace Grid */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left Sidebar: 20 Benchmark Cases Queue */}
-        <CaseQueue
-          cases={casesList}
-          selectedCaseId={selectedCaseId}
-          onSelectCase={handleSelectCase}
-        />
+      {/* Main View Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {activeTab === "DASHBOARD" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <DashboardOverview
+              cases={casesList}
+              onSelectCaseAndInvestigate={handleSelectCaseAndInvestigate}
+              onNavigateTab={setActiveTab}
+              onOpenExporter={() => setIsExporterOpen(true)}
+              onOpenGsqlStudio={() => setIsGsqlOpen(true)}
+            />
+          </main>
+        )}
 
-        {/* Center & Right Investigation Canvas */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-5">
-          {/* Top Row: TigerGraph Topology & Investigation Console */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
-            {/* Left 6 cols: TigerGraph Interactive Visualizer */}
-            <div className="xl:col-span-6 h-[460px]">
-              <GraphVisualizer
-                subgraph={currentCase.subgraph}
-                gsqlQueries={currentCase.gsqlQueries}
-                caseId={currentCase.id}
-              />
-            </div>
+        {activeTab === "INVESTIGATION" && (
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            {/* Left Queue: 20 Cases Sidebar */}
+            <CaseQueue
+              cases={casesList}
+              selectedCaseId={selectedCaseId}
+              onSelectCase={(c) => setSelectedCaseId(c.id)}
+            />
 
-            {/* Right 6 cols: Agent Investigation Console */}
-            <div className="xl:col-span-6 h-[460px]">
-              <InvestigationConsole
-                currentCase={currentCase}
-                onOpenSAR={() => setIsSAROpen(true)}
-              />
-            </div>
+            {/* Investigation Studio Workspace */}
+            <main className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-5">
+              {/* Top Row: Graph Topology + Agent Execution Console */}
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+                <div className="xl:col-span-6 h-[460px]">
+                  <GraphVisualizer
+                    subgraph={currentCase.subgraph}
+                    gsqlQueries={currentCase.gsqlQueries}
+                    caseId={currentCase.id}
+                  />
+                </div>
+                <div className="xl:col-span-6 h-[460px]">
+                  <InvestigationConsole
+                    currentCase={currentCase}
+                    onOpenSAR={() => setIsSAROpen(true)}
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Row: NBA Comparison Before vs After Evidence + Interactive Simulator */}
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+                <div className="xl:col-span-7">
+                  <ActionApprovalCard currentCase={currentCase} />
+                </div>
+                <div className="xl:col-span-5">
+                  <ControlledEvidenceGatherer
+                    evidence={currentCase.controlledEvidence}
+                    currentCase={currentCase}
+                    onSimulateOutcome={handleSimulateEvidenceOutcome}
+                  />
+                </div>
+              </div>
+            </main>
           </div>
+        )}
 
-          {/* Bottom Row: Next-Best Action Governance & Controlled Evidence Gathering */}
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
-            {/* Left 7 cols: Side-by-Side NBA Comparison Before vs After Evidence */}
-            <div className="xl:col-span-7">
-              <ActionApprovalCard currentCase={currentCase} />
-            </div>
+        {activeTab === "CASES" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <CaseManagementView
+              cases={casesList}
+              onSelectCaseAndInvestigate={handleSelectCaseAndInvestigate}
+              onOpenExporter={() => setIsExporterOpen(true)}
+            />
+          </main>
+        )}
 
-            {/* Right 5 cols: Controlled Evidence Simulator */}
-            <div className="xl:col-span-5">
-              <ControlledEvidenceGatherer
-                evidence={currentCase.controlledEvidence}
-                currentCase={currentCase}
-                onSimulateOutcome={handleSimulateEvidenceOutcome}
-              />
-            </div>
-          </div>
-        </main>
+        {activeTab === "ANALYTICS" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <AnalyticsView cases={casesList} />
+          </main>
+        )}
+
+        {activeTab === "TEAM" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <TeamManagementView />
+          </main>
+        )}
+
+        {activeTab === "PROFILE" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <UserProfileView />
+          </main>
+        )}
+
+        {activeTab === "SETTINGS" && (
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <SettingsView
+              tgConfig={tgConfig}
+              onSaveTgConfig={setTgConfig}
+            />
+          </main>
+        )}
       </div>
 
-      {/* Modals and Drawers */}
+      {/* Global Modals */}
       <SARReportView
         sarReport={currentCase.sarReport}
         isOpen={isSAROpen}
@@ -131,13 +209,6 @@ export default function FraudInvestigationDashboard() {
       <CaseMemoryView
         isOpen={isMemoryOpen}
         onClose={() => setIsMemoryOpen(false)}
-      />
-
-      <ConnectionSettingsModal
-        config={tgConfig}
-        onSaveConfig={setTgConfig}
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
       />
 
       <BenchmarkExporter

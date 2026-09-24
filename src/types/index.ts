@@ -87,7 +87,7 @@ export interface InvestigationStep {
   agentReasoning: string;
   evidenceFound?: string[];
   gsqlExecution?: GSQLQueryExecution;
-  uncertaintyScore?: number; // 0 (certain) to 100 (high uncertainty)
+  uncertaintyScore?: number;
 }
 
 export interface ControlledEvidenceAction {
@@ -103,7 +103,7 @@ export interface ControlledEvidenceAction {
     result: "CONFIRMED_FRAUD" | "VERIFIED_LEGITIMATE" | "NO_RESPONSE" | "FAILED_CHALLENGE";
     details: string;
     verifiedAt: string;
-    confidenceDelta: number; // e.g. -45% uncertainty or +30% fraud risk
+    confidenceDelta: number;
   };
 }
 
@@ -135,25 +135,24 @@ export interface HistoricalCaseMemory {
 }
 
 export interface FraudCase {
-  id: string; // e.g., CASE-BENCH-01
-  caseNumber: number; // 1 to 20
+  id: string;
+  caseNumber: number;
   title: string;
   status: CaseStatus;
   createdAt: string;
   updatedAt: string;
 
-  // Transaction details (IEEE-CIS standard)
   transaction: {
     transactionId: string;
     amountUSD: number;
     timestamp: string;
     productCd: "W" | "C" | "R" | "H" | "S";
     card: {
-      card1: string; // BIN
-      card2: string; // issuer
-      card3: string; // country code
+      card1: string;
+      card2: string;
+      card3: string;
       card4: "visa" | "mastercard" | "discover" | "amex";
-      card5: string; // category
+      card5: string;
       card6: "credit" | "debit";
     };
     device: {
@@ -183,35 +182,29 @@ export interface FraudCase {
       c1_c14_velocity: number;
       d1_d15_delta: number;
       v_anomaly_score: number;
-      initialBankModelRiskScore: number; // 0.00 to 1.00
+      initialBankModelRiskScore: number;
     };
   };
 
-  // Trigger
   trigger: {
     type: "RISK_SCORE_THRESHOLD" | "CUSTOMER_DISPUTE" | "ANALYST_QUEUE" | "GRAPH_RING_ALERT";
     description: string;
     score: number;
   };
 
-  // Typology & Risk
   assessment: {
     predictedTypology: FraudTypology;
     initialRiskScore: number;
-    initialUncertainty: number; // 0-100%
+    initialUncertainty: number;
     finalRiskScore: number;
     finalUncertainty: number;
-    confidenceScore: number; // 0-100%
+    confidenceScore: number;
   };
 
-  // Graph Evidence
   subgraph: GraphSubnetwork;
   gsqlQueries: GSQLQueryExecution[];
-
-  // Investigation Trace
   steps: InvestigationStep[];
 
-  // Actions Before Evidence
   actionBeforeEvidence: {
     recommendedAction: NextAction;
     approvalRoute: ApprovalRoute;
@@ -219,10 +212,8 @@ export interface FraudCase {
     canAutoExecute: boolean;
   };
 
-  // Controlled Evidence
   controlledEvidence: ControlledEvidenceAction;
 
-  // Actions After Evidence
   actionAfterEvidence: {
     recommendedAction: NextAction;
     approvalRoute: ApprovalRoute;
@@ -230,12 +221,91 @@ export interface FraudCase {
     status: "PROPOSED" | "APPROVED" | "EXECUTED";
   };
 
-  // SAR
   sarReport?: SuspiciousActivityReport;
-
-  // Historical Memory Match
   similarHistoricalCases: HistoricalCaseMemory[];
-
-  // Graph Writeback Record
   graphMemoryPersisted: boolean;
 }
+
+// User & Role-Based Access Control Models
+export type UserRole =
+  | "Lead Fraud Architect"
+  | "Senior Fraud Operations Lead"
+  | "Tier 1 Fraud Analyst"
+  | "Bank Secrecy Act (BSA) Officer"
+  | "Risk Engineering Lead";
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  clearanceLevel: "Level 1 (Read-Only)" | "Level 2 (Investigator)" | "Level 3 (Action Lead)" | "Level 4 (Executive & BSA)";
+  badgeId: string;
+  department: string;
+  region: string;
+  phone: string;
+  casesInvestigated: number;
+  sarFiledCount: number;
+  accuracyRate: number; // e.g. 99.4%
+  twoFactorEnabled: boolean;
+  lastLogin: string;
+  apiTokens: {
+    id: string;
+    name: string;
+    prefix: string;
+    createdDate: string;
+    expiresIn: string;
+    permissions: string[];
+  }[];
+  recentActivity: {
+    id: string;
+    action: string;
+    targetCaseId: string;
+    timestamp: string;
+    status: "SUCCESS" | "FLAGGED" | "PENDING";
+  }[];
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  clearanceLevel: "Level 1" | "Level 2" | "Level 3" | "Level 4";
+  region: string;
+  status: "ACTIVE" | "ON_SHIFT" | "OFF_SHIFT" | "LEAVE";
+  casesAssigned: number;
+  phone: string;
+  avatarBg: string;
+  permissions: string[];
+  joinedDate: string;
+}
+
+export interface ApiIntegrationConfig {
+  id: string;
+  name: string;
+  serviceCategory: "GRAPH_DATABASE" | "RISK_ENGINE" | "IDENTITY_VERIFICATION" | "REGULATORY_FILING" | "ALERT_WEBHOOK";
+  endpoint: string;
+  apiKeyMasked: string;
+  status: "CONNECTED" | "DEGRADED" | "STANDBY";
+  latencyMs: number;
+  lastSync: string;
+  description: string;
+}
+
+export interface TigerGraphConfig {
+  endpoint: string;
+  graphName: string;
+  apiToken: string;
+  secret?: string;
+  useLiveConnection: boolean;
+}
+
+export type NavigationTab =
+  | "DASHBOARD"
+  | "INVESTIGATION"
+  | "CASES"
+  | "ANALYTICS"
+  | "TEAM"
+  | "PROFILE"
+  | "SETTINGS";

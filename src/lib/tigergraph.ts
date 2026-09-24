@@ -1,12 +1,5 @@
-import { GraphNode, GraphEdge, GSQLQueryExecution } from "@/types";
-
-export interface TigerGraphConfig {
-  endpoint: string;
-  graphName: string;
-  apiToken: string;
-  secret?: string;
-  useLiveConnection: boolean;
-}
+import { GraphNode, GraphEdge, GSQLQueryExecution, TigerGraphConfig } from "@/types";
+export type { TigerGraphConfig };
 
 export const DEFAULT_TIGERGRAPH_CONFIG: TigerGraphConfig = {
   endpoint: "https://savanna.tgcloud.io/instance-hhgoa-byteme",
