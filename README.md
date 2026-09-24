@@ -2,15 +2,16 @@
 ### *AI Agent for Autonomous Fraud Investigation, Uncertainty Reasoning, and Next-Best Action*
 **Hackathon:** TigerGraph Agentic Fraud Investigation (HHGOA 2026)  
 **Team Name:** **ByteMe**  
-**Submission Form:** [https://forms.gle/yxXzqSULGgZ9VUF56](https://forms.gle/yxXzqSULGgZ9VUF56)  
+**Live Production URL:** [https://byteme-fraud-sentinel.vercel.app](https://byteme-fraud-sentinel.vercel.app)  
+**GitHub Repository:** [https://github.com/LordGrimsun/Hacker-house](https://github.com/LordGrimsun/Hacker-house)  
+**Official Hackathon Submission Form:** [https://forms.gle/yxXzqSULGgZ9VUF56](https://forms.gle/yxXzqSULGgZ9VUF56)  
 **Dataset:** IEEE-CIS Fraud Detection (Vesta Corporation, ~590k card transactions, device records, 20 official benchmark test cases)
 
 ---
 
-## ⚡ 1-Click Deploy to Vercel
-Deploy this project directly to Vercel with zero configuration:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+## 🌐 Live Production Deployment
+Experience the live application right now:
+👉 **[https://byteme-fraud-sentinel.vercel.app](https://byteme-fraud-sentinel.vercel.app)**
 
 ```bash
 # Clone the repository
