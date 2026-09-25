@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "tigergraph": {
+      "command": "tigergraph-mcp",
+      "args": [],
+      "env": {
+        "TG_HOST": "https://your-instance.i.tgcloud.io",
+        "TG_GRAPHNAME": "FraudInvestigationGraph",
+        "TG_USERNAME": "tigergraph",
+        "TG_PASSWORD": "your_savanna_password",
+        "TG_API_TOKEN": "your_api_token_here",
+        "TG_TGCLOUD": "true",
+        "TG_RESTPP_PORT": "443",
+        "TG_GS_PORT": "14240",
+        "TG_LOG_TOOL_CALLS": "true"
+      }
+    }
+  }
+}

@@ -125,6 +125,35 @@ export const ConnectionSettingsModal: React.FC<ConnectionSettingsModalProps> = (
             </label>
           </div>
 
+          {/* TigerGraph MCP & Savanna Cloud Quick Links */}
+          <div className="p-3 bg-slate-900/50 rounded-xl border border-orange-500/20 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 font-mono text-[10px] font-bold">
+                MCP
+              </span>
+              <span className="text-[11px] text-slate-300 font-medium">tigergraph-mcp / Savanna Cloud</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <a
+                href="https://savanna.tgcloud.io/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] text-orange-400 hover:text-orange-300 underline font-medium"
+              >
+                savanna.tgcloud.io ↗
+              </a>
+              <span className="text-slate-600">•</span>
+              <a
+                href="https://github.com/tigergraph/tigergraph-mcp"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 underline font-medium"
+              >
+                MCP repo ↗
+              </a>
+            </div>
+          </div>
+
           {testResult && (
             <div className={`p-3 rounded-xl border text-xs flex items-center space-x-2 ${
               testResult.success ? "bg-emerald-950/40 border-emerald-800 text-emerald-300" : "bg-rose-950/40 border-rose-800 text-rose-300"

@@ -147,6 +147,39 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ tgConfig, onSaveTgCo
               <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
             </label>
           </div>
+
+          {/* TigerGraph MCP & Savanna Cloud Integrations Banner */}
+          <div className="p-3.5 bg-gradient-to-r from-orange-950/30 to-slate-900/60 rounded-xl border border-orange-500/20 space-y-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                  MCP v1.0
+                </span>
+                <span className="text-xs font-bold text-white">TigerGraph Model Context Protocol (MCP)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <a
+                  href="https://savanna.tgcloud.io/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-2 py-1 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/40 text-[11px] font-semibold text-orange-300 transition-colors"
+                >
+                  Savanna Console ↗
+                </a>
+                <a
+                  href="https://github.com/tigergraph/tigergraph-mcp"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-slate-200 transition-colors"
+                >
+                  GitHub MCP Repo ↗
+                </a>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              The Agent connects to TigerGraph Savanna via the official <span className="text-orange-300 font-mono">tigergraph-mcp</span> server over stdio / SSE JSON-RPC. Supports <span className="font-mono text-slate-300">tigergraph__run_installed_query</span>, <span className="font-mono text-slate-300">tigergraph__gsql</span>, and <span className="font-mono text-slate-300">tigergraph__get_neighbors</span>.
+            </p>
+          </div>
         </div>
 
         {/* Section 2: External APIs & Connected Services */}

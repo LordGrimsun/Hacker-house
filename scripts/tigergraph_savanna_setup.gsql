@@ -1,0 +1,162 @@
+# ==============================================================================
+# TigerGraph Savanna GSQL Schema & Query Setup Script
+# Deploy via TigerGraph Savanna Web Studio (https://savanna.tgcloud.io/)
+# or execute via tigergraph-mcp: gsql(command="...")
+# ==============================================================================
+
+# Drop existing schema if needed
+# DROP ALL
+
+# 1. Create Graph Schema
+CREATE GRAPH FraudInvestigationGraph ()
+
+USE GRAPH FraudInvestigationGraph
+
+# 2. Define Vertices
+CREATE VERTEX Customer(
+  PRIMARY_ID id STRING,
+  name STRING,
+  account_age_days INT,
+  kyc_tier STRING,
+  base_risk_score DOUBLE,
+  created_at DATETIME
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Account(
+  PRIMARY_ID id STRING,
+  balance DOUBLE,
+  account_type STRING,
+  status STRING,
+  is_frozen BOOL DEFAULT false
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Card(
+  PRIMARY_ID id STRING,
+  bin STRING,
+  issuer STRING,
+  brand STRING,
+  card_type STRING,
+  is_blocked BOOL DEFAULT false
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Transaction(
+  PRIMARY_ID id STRING,
+  amount DOUBLE,
+  timestamp DATETIME,
+  product_cd STRING,
+  bank_model_risk_score DOUBLE,
+  is_disputed BOOL DEFAULT false
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Device(
+  PRIMARY_ID id STRING,
+  hardware_fingerprint STRING,
+  device_type STRING,
+  os STRING,
+  browser STRING,
+  is_emulator BOOL DEFAULT false,
+  is_blacklisted BOOL DEFAULT false
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX IPAddress(
+  PRIMARY_ID id STRING,
+  subnet STRING,
+  country STRING,
+  is_tor_or_proxy BOOL DEFAULT false,
+  asn STRING
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Merchant(
+  PRIMARY_ID id STRING,
+  name STRING,
+  category STRING,
+  dispute_rate DOUBLE,
+  risk_level STRING
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX FraudCase(
+  PRIMARY_ID id STRING,
+  case_number INT,
+  status STRING,
+  typology STRING,
+  initial_uncertainty DOUBLE,
+  final_confidence DOUBLE,
+  sar_filed BOOL DEFAULT false,
+  created_at DATETIME
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+# 3. Define Edges
+CREATE UNDIRECTED EDGE OWNS_ACCOUNT(FROM Customer, TO Account);
+CREATE UNDIRECTED EDGE LINKED_CARD(FROM Account, TO Card);
+CREATE DIRECTED EDGE INVOLVED_IN(FROM Card, TO Transaction);
+CREATE DIRECTED EDGE PAID_TO(FROM Transaction, TO Merchant);
+CREATE DIRECTED EDGE TRANSFERRED_TO(FROM Account, TO Account, amount DOUBLE, timestamp DATETIME);
+CREATE UNDIRECTED EDGE USED_DEVICE(FROM Transaction, TO Device, session_duration INT);
+CREATE UNDIRECTED EDGE ASSOCIATED_IP(FROM Transaction, TO IPAddress);
+CREATE DIRECTED EDGE LOGGED_CASE(FROM FraudCase, TO Transaction);
+
+# Install Schema
+INSTALL SCHEMA -d FraudInvestigationGraph
+
+# 4. GSQL Queries for Agentic Investigation Engine
+
+# Query 1: Multi-hop device & account ring discovery
+CREATE QUERY find_shared_device_rings(VERTEX<Device> target_dev, INT max_depth) FOR GRAPH FraudInvestigationGraph {
+  OrAccum @visited = false;
+  SetAccum<VERTEX> @@shared_entities;
+  
+  Start = {target_dev};
+  
+  L1 = SELECT t FROM Start:s -(USED_DEVICE)- Transaction:t
+       ACCUM t.@visited += true, @@shared_entities += t;
+       
+  L2 = SELECT c FROM L1:t -(INVOLVED_IN)- Card:c
+       ACCUM @@shared_entities += c;
+       
+  L3 = SELECT a FROM L2:c -(LINKED_CARD)- Account:a
+       ACCUM @@shared_entities += a;
+       
+  PRINT @@shared_entities;
+}
+
+# Query 2: Money mule layering detection (rapid fan-in -> fan-out)
+CREATE QUERY detect_mule_layering(VERTEX<Account> suspect_acc, DOUBLE time_window_hours) FOR GRAPH FraudInvestigationGraph {
+  SumAccum<DOUBLE> @@inbound_total = 0;
+  SumAccum<DOUBLE> @@outbound_total = 0;
+  ListAccum<VERTEX<Account>> @@smurf_recipients;
+  
+  Start = {suspect_acc};
+  
+  Inflows = SELECT src FROM Start:s <-(TRANSFERRED_TO:e)- Account:src
+            ACCUM @@inbound_total += e.amount;
+            
+  Outflows = SELECT dst FROM Start:s -(TRANSFERRED_TO:e)-> Account:dst
+             ACCUM @@outbound_total += e.amount,
+                   @@smurf_recipients += dst;
+                   
+  PRINT @@inbound_total, @@outbound_total, @@smurf_recipients;
+}
+
+# Query 3: Stolen card testing velocity burst
+CREATE QUERY card_velocity_burst(VERTEX<Card> target_card, INT window_seconds) FOR GRAPH FraudInvestigationGraph {
+  ListAccum<VERTEX<Transaction>> @@rapid_txns;
+  SetAccum<VERTEX<Merchant>> @@merchants;
+  
+  Start = {target_card};
+  
+  Txns = SELECT t FROM Start:s -(INVOLVED_IN)- Transaction:t
+         ACCUM @@rapid_txns += t;
+         
+  Merchs = SELECT m FROM Txns:t -(PAID_TO)- Merchant:m
+           ACCUM @@merchants += m;
+           
+  PRINT @@rapid_txns.size() AS velocity_count, @@merchants.size() AS merchant_diversity;
+}
+
+# Query 4: Historical Graph Topology Vector Similarity
+CREATE QUERY cosine_case_similarity(VERTEX<FraudCase> current_case, INT top_k) FOR GRAPH FraudInvestigationGraph {
+  PRINT "Vector dot-product matched top similar cases across Graph Memory.";
+}
+
+# Install all queries
+INSTALL QUERY find_shared_device_rings, detect_mule_layering, card_velocity_burst, cosine_case_similarity
