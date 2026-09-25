@@ -1,0 +1,265 @@
+{
+  "case_id": "HHG-011",
+  "case_number": 11,
+  "benchmark_reference_id": "CASE-BENCH-11",
+  "title": "Layered Crypto Off-Ramp via Intermediary P2P Conduit",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-16T10:00:00Z",
+  "updated_at": "2026-08-16T10:07:30Z",
+  "transaction": {
+    "transaction_id": "TXN-3915631",
+    "amount": 17800,
+    "amount_inr": 17800,
+    "currency": "INR",
+    "timestamp": "2026-08-16T09:58:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-14532",
+      "name": "Kiran Patel (Mule)",
+      "accountAgeDays": 45,
+      "historicalAvgTransactionUSD": 45,
+      "accountBalanceUSD": 44500,
+      "kycTier": "SIMPLIFIED"
+    },
+    "merchant": {
+      "merchantId": "MERCH-8011",
+      "merchantName": "BitRapid P2P Exchange",
+      "merchantCategory": "Money Mule Network & Layering",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Android/Windows Emulator",
+      "deviceType": "desktop",
+      "os": "Linux/Android",
+      "browser": "Chrome",
+      "ipSubnet": "185.190.22.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "15421",
+      "card2": "321",
+      "card3": "150",
+      "card4": "mastercard",
+      "card5": "226",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 14,
+      "d1_d15_delta": 0.02,
+      "v_anomaly_score": 0.89,
+      "initialBankModelRiskScore": 0.89
+    }
+  },
+  "typology": "Money Mule Network & Layering",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Anomaly score 0.89 exceeded policy threshold for typology: Money Mule Network & Layering.",
+      "score": 0.89
+    },
+    "assessment": {
+      "initial_risk_score": 0.89,
+      "final_risk_score": 0.97,
+      "confidence_score": 98,
+      "initial_uncertainty": 32,
+      "final_uncertainty": 2,
+      "predicted_typology": "Money Mule Network & Layering"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Triggered policy threshold for Money Mule Network & Layering. Initiating TigerGraph investigation.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Graph topology reveals shared risk attributes and anomalous device signals.",
+        "evidence": [
+          "Suspicious IP/Device fingerprint mismatch",
+          "Velocity exceeds standard deviation",
+          "Merchant flagged in fraud database"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Gathering controlled evidence to reach defensible legal threshold.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Awaiting customer authentication feedback.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty resolved. Executing Freeze Account & Clawback Associated Transfers. Graph memory updated.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "subgraph_neighborhood_expansion",
+        "description": "Expand 2-hop neighborhood to discover connected entities and shared fraud markers",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Transaction> t) SYNTAX v2 {\n  Seed = {t};\n  Connected = SELECT v FROM Seed:s -(INVOLVED_IN|USED_DEVICE|ASSOCIATED_IP)- :v;\n  PRINT Connected.size();\n}",
+        "parameters": {
+          "t": "TXN-11"
+        },
+        "execution_time_ms": 16,
+        "result_summary": "Traversed 2 hops in TigerGraph. Found high cluster risk density with multiple shared edges.",
+        "returned_vertices": 5,
+        "returned_edges": 4
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.78,
+      "community_cluster": "COMM-BENCH-11",
+      "nodes": [
+        {
+          "id": "CUST-11",
+          "label": "Kiran Patel (Mule)",
+          "type": "Customer",
+          "riskScore": 0.92,
+          "properties": {
+            "name": "Kiran Patel (Mule)"
+          }
+        },
+        {
+          "id": "CARD-11",
+          "label": "Card 11",
+          "type": "Card",
+          "riskScore": 0.88,
+          "properties": {}
+        },
+        {
+          "id": "TXN-11",
+          "label": "TXN $17,800",
+          "type": "Transaction",
+          "riskScore": 0.89,
+          "isFlagged": true,
+          "properties": {
+            "amount": 17800
+          }
+        },
+        {
+          "id": "DEV-11",
+          "label": "Device #D-11",
+          "type": "Device",
+          "riskScore": 0.95,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "MERCH-11",
+          "label": "BitRapid P2P Exchange",
+          "type": "Merchant",
+          "riskScore": 0.84,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "be-11-1",
+          "source": "CUST-11",
+          "target": "CARD-11",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "be-11-2",
+          "source": "CARD-11",
+          "target": "TXN-11",
+          "label": "BILLED",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-11-3",
+          "source": "TXN-11",
+          "target": "DEV-11",
+          "label": "ACCESSED_BY",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-11-4",
+          "source": "TXN-11",
+          "target": "MERCH-11",
+          "label": "PAID_TO",
+          "type": "PURCHASED_AT"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Hold Funds 24 Hours Pending Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "Signal uncertainty requires controlled evidence collection before permanent action.",
+    "initial_uncertainty_score": 32,
+    "policy_reference": "POL-001-STEP-UP"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-11",
+    "evidence_type": "CUSTOMER_SMS_VERIFY",
+    "policy_rule": "POL-001-STEP-UP",
+    "requested_details": "Verify transaction authorization and device legitimacy.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Source funds traced to corporate payroll redirect phish; recipient account frozen.",
+      "verifiedAt": "2026-08-16T10:02:15Z",
+      "confidenceDelta": 30
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Freeze Account & Clawback Associated Transfers",
+    "approval_route": "Bank Secrecy Act (BSA) / Compliance Officer",
+    "rationale": "Evidence confirmed status as CONFIRMED_FRAUD. Final next best action executed in compliance with policy.",
+    "final_confidence_score": 98,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-011",
+    "filing_date": "2026-08-16",
+    "total_amount_at_risk": 17800,
+    "currency": "INR",
+    "primary_typology": "Money Mule Network & Layering",
+    "law_enforcement_codes": [
+      "MONEY_MULE_NETWORK_&_LAYERING"
+    ],
+    "summary_narrative": "On August 16, 2026, an unauthorized financial transaction of Rs. 17,800 was intercepted matching the typology 'Money Mule Network & Layering'. Graph analysis confirmed malicious nexus. Controlled evidence verification failed, and funds were preserved.",
+    "graph_nexus": "TigerGraph community COMM-BENCH-11 revealed anomalous cluster density.",
+    "chronology": [
+      "09:58:00Z - Suspicious transaction attempted",
+      "09:58:10Z - Model risk score triggered autonomous agent",
+      "10:00:30Z - Controlled evidence challenge issued",
+      "10:02:15Z - Challenge failed / confirmed illicit",
+      "10:03:00Z - Remediation action executed and SAR generated"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M4-002",
+      "similarity_score": 0.91,
+      "typology": "Money Mule Network & Layering"
+    }
+  ]
+}

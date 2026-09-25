@@ -1,0 +1,298 @@
+{
+  "case_id": "HHG-004",
+  "case_number": 4,
+  "benchmark_reference_id": "CASE-BENCH-04",
+  "title": "Rapid Mule Layering: Rs. 24,500 Incoming Transfer Dispersed in 4 Smurf Accounts",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-07T11:05:00Z",
+  "updated_at": "2026-08-07T11:14:30Z",
+  "transaction": {
+    "transaction_id": "TXN-3866104",
+    "amount": 24500,
+    "amount_inr": 24500,
+    "currency": "INR",
+    "timestamp": "2026-08-07T11:00:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-MULE-81",
+      "name": "Tyler Jenkins (Mule Conduit)",
+      "accountAgeDays": 24,
+      "historicalAvgTransactionUSD": 12,
+      "accountBalanceUSD": 24650,
+      "kycTier": "SIMPLIFIED"
+    },
+    "merchant": {
+      "merchantId": "MERCH-P2P-9",
+      "merchantName": "Instant Crypto On-Ramp / P2P Transit",
+      "merchantCategory": "Money Service Business (MSB)",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Samsung Galaxy S23 Android 14",
+      "deviceType": "mobile",
+      "os": "Android",
+      "browser": "Chrome Mobile",
+      "ipSubnet": "172.56.21.0/24",
+      "geoMismatch": false,
+      "proxyOrVpnDetected": false
+    },
+    "card": {
+      "card1": "19230",
+      "card2": "111",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "debit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 18,
+      "d1_d15_delta": 0.02,
+      "v_anomaly_score": 0.96,
+      "initialBankModelRiskScore": 0.92
+    }
+  },
+  "typology": "Money Mule Network & Layering",
+  "investigation_record": {
+    "trigger": {
+      "type": "GRAPH_RING_ALERT",
+      "description": "TigerGraph GSQL Cycle Detection alert: Account received $24,500 from known compromised elder account and immediately issued 4 P2P transfers under $5,000 threshold.",
+      "score": 0.92
+    },
+    "assessment": {
+      "initial_risk_score": 0.92,
+      "final_risk_score": 0.98,
+      "confidence_score": 98,
+      "initial_uncertainty": 20,
+      "final_uncertainty": 2,
+      "predicted_typology": "Money Mule Network & Layering"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Classic structuring/smurfing pattern designed to evade Bank Secrecy Act CTR triggers.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Inbound wire traced back to 84-year-old victim account which filed an unauthorized access report 40 minutes ago.",
+        "evidence": [
+          "Source account belongs to elder abuse victim",
+          "Outbound transfers structured precisely under $5k",
+          "Conduit account opened only 24 days prior"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Policy POL-003 authorizes immediate debit freeze on recipient accounts to prevent total loss.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Branch confirmed victim was misled via tech-support remote access scam into authorizing wire.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty 2%. Confirmed money laundering conduit. Drafting mandatory BSA SAR filing.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "detect_mule_layering",
+        "description": "Detect fan-in followed immediately by fan-out smurfing transactions within a 2-hour window",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Account> src) SYNTAX v2 {\n  Seed = {src};\n  Inflows = SELECT a FROM Seed:s <-(TRANSFERRED_TO)- Account:a;\n  Outflows = SELECT b FROM Seed:s -(TRANSFERRED_TO)-> Account:b;\n  PRINT Inflows.size(), Outflows.size();\n}",
+        "parameters": {
+          "src": "ACC-MULE-81"
+        },
+        "execution_time_ms": 18,
+        "result_summary": "High centrality hub detected: 1 inbound transfer ($24,500) followed within 12 minutes by 4 outbound transfers totaling $19,600.",
+        "returned_vertices": 6,
+        "returned_edges": 5
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 7,
+      "edges_count": 5,
+      "density_score": 0.79,
+      "community_cluster": "COMM-MULE-441",
+      "nodes": [
+        {
+          "id": "ACC-VICTIM-ELDER",
+          "label": "Elder Victim Account #90124",
+          "type": "Account",
+          "riskScore": 0.85,
+          "properties": {
+            "loss_amount": 24500
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CUST-MULE-81",
+          "label": "Tyler Jenkins (Mule)",
+          "type": "Customer",
+          "riskScore": 0.94,
+          "properties": {
+            "tenure_days": 24
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "ACC-MULE-81",
+          "label": "Conduit Account 81",
+          "type": "Account",
+          "riskScore": 0.96,
+          "properties": {
+            "balance": 24650
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "ACC-SMURF-A",
+          "label": "Smurf Recipient #1 ($4,900)",
+          "type": "Account",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "ACC-SMURF-B",
+          "label": "Smurf Recipient #2 ($4,850)",
+          "type": "Account",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "ACC-SMURF-C",
+          "label": "Smurf Recipient #3 ($4,950)",
+          "type": "Account",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "ACC-SMURF-D",
+          "label": "Smurf Recipient #4 ($4,900)",
+          "type": "Account",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "me1",
+          "source": "ACC-VICTIM-ELDER",
+          "target": "ACC-MULE-81",
+          "label": "FRAUD_INFLOW $24,500",
+          "type": "TRANSFERRED_TO",
+          "isSuspicious": true
+        },
+        {
+          "id": "me2",
+          "source": "ACC-MULE-81",
+          "target": "ACC-SMURF-A",
+          "label": "OUTFLOW $4,900",
+          "type": "TRANSFERRED_TO",
+          "isSuspicious": true
+        },
+        {
+          "id": "me3",
+          "source": "ACC-MULE-81",
+          "target": "ACC-SMURF-B",
+          "label": "OUTFLOW $4,850",
+          "type": "TRANSFERRED_TO",
+          "isSuspicious": true
+        },
+        {
+          "id": "me4",
+          "source": "ACC-MULE-81",
+          "target": "ACC-SMURF-C",
+          "label": "OUTFLOW $4,950",
+          "type": "TRANSFERRED_TO",
+          "isSuspicious": true
+        },
+        {
+          "id": "me5",
+          "source": "ACC-MULE-81",
+          "target": "ACC-SMURF-D",
+          "label": "OUTFLOW $4,900",
+          "type": "TRANSFERRED_TO",
+          "isSuspicious": true
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Temporary Account Debit Freeze",
+    "approval_route": "Senior Fraud Operations Lead Approval",
+    "rationale": "Emergency debit freeze to stop immediate offramping of funds while victim affidavit is checked.",
+    "initial_uncertainty_score": 20,
+    "policy_reference": "POL-003-ACCOUNT-FREEZE"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-04",
+    "evidence_type": "ANALYST_CALL",
+    "policy_rule": "POL-003-ACCOUNT-FREEZE",
+    "requested_details": "Verify whether wire transfer #W-90124 was authorized by victim account holder.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Branch manager confirms victim is elderly customer reporting AnyDesk screen control scam; requested urgent clawback.",
+      "verifiedAt": "2026-08-07T11:08:30Z",
+      "confidenceDelta": 28
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Freeze Account & Clawback Associated Transfers",
+    "approval_route": "Bank Secrecy Act (BSA) / Compliance Officer",
+    "rationale": "Clawback all 4 outbound transfers via NACHA/Fedwire urgent recall; freeze mule conduit; submit SAR to FinCEN.",
+    "final_confidence_score": 98,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-004",
+    "filing_date": "2026-08-07",
+    "total_amount_at_risk": 24500,
+    "currency": "INR",
+    "primary_typology": "Money Mule Network & Layering",
+    "law_enforcement_codes": [
+      "MONEY_LAUNDERING_MULE",
+      "ELDER_FINANCIAL_EXPLOITATION",
+      "STRUCTURING_SMURFING"
+    ],
+    "summary_narrative": "On August 7, 2026, subject Tyler Jenkins utilized a recently established account to receive $24,500.00 derived from an elder financial exploitation scam. Within minutes of receipt, subject attempted four structured outbound P2P transfers of $4,900, $4,850, $4,950, and $4,900 to evade currency transaction thresholds. Autonomous intervention intercepted the funds before withdrawal.",
+    "graph_nexus": "TigerGraph flow analysis identified directed acyclic smurfing topology from victim vertex to 4 destination wallets.",
+    "chronology": [
+      "11:00:00Z - $24,500 wire received from victim",
+      "11:01:15Z - 4 structured outbound transfers initiated",
+      "11:03:15Z - TigerGraph mule layering query identifies smurfing topology",
+      "11:05:00Z - Urgent branch affidavit verified scam",
+      "11:10:00Z - All outbound transfers recalled and frozen"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M3-005",
+      "similarity_score": 0.98,
+      "typology": "Money Mule Network & Layering"
+    }
+  ]
+}

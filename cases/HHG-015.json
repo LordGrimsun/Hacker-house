@@ -1,0 +1,265 @@
+{
+  "case_id": "HHG-015",
+  "case_number": 15,
+  "benchmark_reference_id": "CASE-BENCH-15",
+  "title": "Fabricated Credit Repair Profile with Shared Authorized Tradeline",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-20T10:00:00Z",
+  "updated_at": "2026-08-20T10:07:30Z",
+  "transaction": {
+    "transaction_id": "TXN-3921315",
+    "amount": 5400,
+    "amount_inr": 5400,
+    "currency": "INR",
+    "timestamp": "2026-08-20T09:58:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-16180",
+      "name": "Julian Vance (Synthetic)",
+      "accountAgeDays": 45,
+      "historicalAvgTransactionUSD": 45,
+      "accountBalanceUSD": 13500,
+      "kycTier": "SIMPLIFIED"
+    },
+    "merchant": {
+      "merchantId": "MERCH-8015",
+      "merchantName": "Luxury Timepiece Vault",
+      "merchantCategory": "Synthetic Identity Ring",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Android/Windows Emulator",
+      "deviceType": "desktop",
+      "os": "Linux/Android",
+      "browser": "Chrome",
+      "ipSubnet": "185.190.22.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "16665",
+      "card2": "321",
+      "card3": "150",
+      "card4": "mastercard",
+      "card5": "226",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 14,
+      "d1_d15_delta": 0.02,
+      "v_anomaly_score": 0.85,
+      "initialBankModelRiskScore": 0.85
+    }
+  },
+  "typology": "Synthetic Identity Ring",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Anomaly score 0.85 exceeded policy threshold for typology: Synthetic Identity Ring.",
+      "score": 0.85
+    },
+    "assessment": {
+      "initial_risk_score": 0.85,
+      "final_risk_score": 0.97,
+      "confidence_score": 98,
+      "initial_uncertainty": 32,
+      "final_uncertainty": 2,
+      "predicted_typology": "Synthetic Identity Ring"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Triggered policy threshold for Synthetic Identity Ring. Initiating TigerGraph investigation.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Graph topology reveals shared risk attributes and anomalous device signals.",
+        "evidence": [
+          "Suspicious IP/Device fingerprint mismatch",
+          "Velocity exceeds standard deviation",
+          "Merchant flagged in fraud database"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Gathering controlled evidence to reach defensible legal threshold.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Awaiting customer authentication feedback.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty resolved. Executing Freeze Account & Clawback Associated Transfers. Graph memory updated.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "subgraph_neighborhood_expansion",
+        "description": "Expand 2-hop neighborhood to discover connected entities and shared fraud markers",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Transaction> t) SYNTAX v2 {\n  Seed = {t};\n  Connected = SELECT v FROM Seed:s -(INVOLVED_IN|USED_DEVICE|ASSOCIATED_IP)- :v;\n  PRINT Connected.size();\n}",
+        "parameters": {
+          "t": "TXN-15"
+        },
+        "execution_time_ms": 13,
+        "result_summary": "Traversed 2 hops in TigerGraph. Found high cluster risk density with multiple shared edges.",
+        "returned_vertices": 5,
+        "returned_edges": 4
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.78,
+      "community_cluster": "COMM-BENCH-15",
+      "nodes": [
+        {
+          "id": "CUST-15",
+          "label": "Julian Vance (Synthetic)",
+          "type": "Customer",
+          "riskScore": 0.92,
+          "properties": {
+            "name": "Julian Vance (Synthetic)"
+          }
+        },
+        {
+          "id": "CARD-15",
+          "label": "Card 15",
+          "type": "Card",
+          "riskScore": 0.88,
+          "properties": {}
+        },
+        {
+          "id": "TXN-15",
+          "label": "TXN $5,400",
+          "type": "Transaction",
+          "riskScore": 0.85,
+          "isFlagged": true,
+          "properties": {
+            "amount": 5400
+          }
+        },
+        {
+          "id": "DEV-15",
+          "label": "Device #D-15",
+          "type": "Device",
+          "riskScore": 0.95,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "MERCH-15",
+          "label": "Luxury Timepiece Vault",
+          "type": "Merchant",
+          "riskScore": 0.84,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "be-15-1",
+          "source": "CUST-15",
+          "target": "CARD-15",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "be-15-2",
+          "source": "CARD-15",
+          "target": "TXN-15",
+          "label": "BILLED",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-15-3",
+          "source": "TXN-15",
+          "target": "DEV-15",
+          "label": "ACCESSED_BY",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-15-4",
+          "source": "TXN-15",
+          "target": "MERCH-15",
+          "label": "PAID_TO",
+          "type": "PURCHASED_AT"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Hold Funds 24 Hours Pending Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "Signal uncertainty requires controlled evidence collection before permanent action.",
+    "initial_uncertainty_score": 32,
+    "policy_reference": "POL-001-STEP-UP"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-15",
+    "evidence_type": "CUSTOMER_SMS_VERIFY",
+    "policy_rule": "POL-001-STEP-UP",
+    "requested_details": "Verify transaction authorization and device legitimacy.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Social Security Administration database query returned SSN assigned to deceased individual.",
+      "verifiedAt": "2026-08-20T10:02:15Z",
+      "confidenceDelta": 30
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Freeze Account & Clawback Associated Transfers",
+    "approval_route": "Bank Secrecy Act (BSA) / Compliance Officer",
+    "rationale": "Evidence confirmed status as CONFIRMED_FRAUD. Final next best action executed in compliance with policy.",
+    "final_confidence_score": 98,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-015",
+    "filing_date": "2026-08-20",
+    "total_amount_at_risk": 5400,
+    "currency": "INR",
+    "primary_typology": "Synthetic Identity Ring",
+    "law_enforcement_codes": [
+      "SYNTHETIC_IDENTITY_RING"
+    ],
+    "summary_narrative": "On August 20, 2026, an unauthorized financial transaction of Rs. 5,400 was intercepted matching the typology 'Synthetic Identity Ring'. Graph analysis confirmed malicious nexus. Controlled evidence verification failed, and funds were preserved.",
+    "graph_nexus": "TigerGraph community COMM-BENCH-15 revealed anomalous cluster density.",
+    "chronology": [
+      "09:58:00Z - Suspicious transaction attempted",
+      "09:58:10Z - Model risk score triggered autonomous agent",
+      "10:00:30Z - Controlled evidence challenge issued",
+      "10:02:15Z - Challenge failed / confirmed illicit",
+      "10:03:00Z - Remediation action executed and SAR generated"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M4-001",
+      "similarity_score": 0.91,
+      "typology": "Synthetic Identity Ring"
+    }
+  ]
+}

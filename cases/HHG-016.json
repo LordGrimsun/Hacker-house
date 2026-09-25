@@ -1,0 +1,265 @@
+{
+  "case_id": "HHG-016",
+  "case_number": 16,
+  "benchmark_reference_id": "CASE-BENCH-16",
+  "title": "Stolen Debit Card PIN Probing at Multiple Foreign POS Terminals",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-21T10:00:00Z",
+  "updated_at": "2026-08-21T10:07:30Z",
+  "transaction": {
+    "transaction_id": "TXN-3922736",
+    "amount": 1600,
+    "amount_inr": 1600,
+    "currency": "INR",
+    "timestamp": "2026-08-21T09:58:00Z",
+    "product_code": "R",
+    "customer": {
+      "customerId": "CUST-16592",
+      "name": "Hannah Abbott",
+      "accountAgeDays": 45,
+      "historicalAvgTransactionUSD": 45,
+      "accountBalanceUSD": 4000,
+      "kycTier": "SIMPLIFIED"
+    },
+    "merchant": {
+      "merchantId": "MERCH-8016",
+      "merchantName": "Cancun Resort ATM Terminal",
+      "merchantCategory": "Card Bust-Out & Stolen Card Velocity",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Android/Windows Emulator",
+      "deviceType": "desktop",
+      "os": "Linux/Android",
+      "browser": "Chrome",
+      "ipSubnet": "185.190.22.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "16976",
+      "card2": "321",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "debit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 14,
+      "d1_d15_delta": 0.02,
+      "v_anomaly_score": 0.94,
+      "initialBankModelRiskScore": 0.94
+    }
+  },
+  "typology": "Card Bust-Out & Stolen Card Velocity",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Anomaly score 0.94 exceeded policy threshold for typology: Card Bust-Out & Stolen Card Velocity.",
+      "score": 0.94
+    },
+    "assessment": {
+      "initial_risk_score": 0.94,
+      "final_risk_score": 0.97,
+      "confidence_score": 98,
+      "initial_uncertainty": 32,
+      "final_uncertainty": 2,
+      "predicted_typology": "Card Bust-Out & Stolen Card Velocity"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Triggered policy threshold for Card Bust-Out & Stolen Card Velocity. Initiating TigerGraph investigation.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Graph topology reveals shared risk attributes and anomalous device signals.",
+        "evidence": [
+          "Suspicious IP/Device fingerprint mismatch",
+          "Velocity exceeds standard deviation",
+          "Merchant flagged in fraud database"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Gathering controlled evidence to reach defensible legal threshold.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Awaiting customer authentication feedback.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty resolved. Executing Permanent Card Cancellation & Re-issue. Graph memory updated.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "subgraph_neighborhood_expansion",
+        "description": "Expand 2-hop neighborhood to discover connected entities and shared fraud markers",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Transaction> t) SYNTAX v2 {\n  Seed = {t};\n  Connected = SELECT v FROM Seed:s -(INVOLVED_IN|USED_DEVICE|ASSOCIATED_IP)- :v;\n  PRINT Connected.size();\n}",
+        "parameters": {
+          "t": "TXN-16"
+        },
+        "execution_time_ms": 14,
+        "result_summary": "Traversed 2 hops in TigerGraph. Found high cluster risk density with multiple shared edges.",
+        "returned_vertices": 5,
+        "returned_edges": 4
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.78,
+      "community_cluster": "COMM-BENCH-16",
+      "nodes": [
+        {
+          "id": "CUST-16",
+          "label": "Hannah Abbott",
+          "type": "Customer",
+          "riskScore": 0.92,
+          "properties": {
+            "name": "Hannah Abbott"
+          }
+        },
+        {
+          "id": "CARD-16",
+          "label": "Card 16",
+          "type": "Card",
+          "riskScore": 0.88,
+          "properties": {}
+        },
+        {
+          "id": "TXN-16",
+          "label": "TXN $1,600",
+          "type": "Transaction",
+          "riskScore": 0.94,
+          "isFlagged": true,
+          "properties": {
+            "amount": 1600
+          }
+        },
+        {
+          "id": "DEV-16",
+          "label": "Device #D-16",
+          "type": "Device",
+          "riskScore": 0.95,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "MERCH-16",
+          "label": "Cancun Resort ATM Terminal",
+          "type": "Merchant",
+          "riskScore": 0.84,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "be-16-1",
+          "source": "CUST-16",
+          "target": "CARD-16",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "be-16-2",
+          "source": "CARD-16",
+          "target": "TXN-16",
+          "label": "BILLED",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-16-3",
+          "source": "TXN-16",
+          "target": "DEV-16",
+          "label": "ACCESSED_BY",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "be-16-4",
+          "source": "TXN-16",
+          "target": "MERCH-16",
+          "label": "PAID_TO",
+          "type": "PURCHASED_AT"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Hold Funds 24 Hours Pending Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "Signal uncertainty requires controlled evidence collection before permanent action.",
+    "initial_uncertainty_score": 32,
+    "policy_reference": "POL-001-STEP-UP"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-16",
+    "evidence_type": "CUSTOMER_SMS_VERIFY",
+    "policy_rule": "POL-001-STEP-UP",
+    "requested_details": "Verify transaction authorization and device legitimacy.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Customer reported physical card stolen from hotel gym locker 1 hour prior.",
+      "verifiedAt": "2026-08-21T10:02:15Z",
+      "confidenceDelta": 30
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Permanent Card Cancellation & Re-issue",
+    "approval_route": "Senior Fraud Operations Lead Approval",
+    "rationale": "Evidence confirmed status as CONFIRMED_FRAUD. Final next best action executed in compliance with policy.",
+    "final_confidence_score": 98,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-016",
+    "filing_date": "2026-08-21",
+    "total_amount_at_risk": 1600,
+    "currency": "INR",
+    "primary_typology": "Card Bust-Out & Stolen Card Velocity",
+    "law_enforcement_codes": [
+      "CARD_BUST-OUT_&_STOLEN_CARD_VELOCITY"
+    ],
+    "summary_narrative": "On August 21, 2026, an unauthorized financial transaction of Rs. 1,600 was intercepted matching the typology 'Card Bust-Out & Stolen Card Velocity'. Graph analysis confirmed malicious nexus. Controlled evidence verification failed, and funds were preserved.",
+    "graph_nexus": "TigerGraph community COMM-BENCH-16 revealed anomalous cluster density.",
+    "chronology": [
+      "09:58:00Z - Suspicious transaction attempted",
+      "09:58:10Z - Model risk score triggered autonomous agent",
+      "10:00:30Z - Controlled evidence challenge issued",
+      "10:02:15Z - Challenge failed / confirmed illicit",
+      "10:03:00Z - Remediation action executed and SAR generated"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M1-002",
+      "similarity_score": 0.91,
+      "typology": "Card Bust-Out & Stolen Card Velocity"
+    }
+  ]
+}

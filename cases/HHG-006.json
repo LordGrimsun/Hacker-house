@@ -1,0 +1,274 @@
+{
+  "case_id": "HHG-006",
+  "case_number": 6,
+  "benchmark_reference_id": "CASE-BENCH-06",
+  "title": "Triangulation E-Commerce Storefront Exploiting Compromised Cards",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-11T16:20:00Z",
+  "updated_at": "2026-08-11T16:26:40Z",
+  "transaction": {
+    "transaction_id": "TXN-3889104",
+    "amount": 2890,
+    "amount_inr": 2890,
+    "currency": "INR",
+    "timestamp": "2026-08-11T16:18:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-55198",
+      "name": "Clara Oswald",
+      "accountAgeDays": 1820,
+      "historicalAvgTransactionUSD": 60,
+      "accountBalanceUSD": 9400,
+      "kycTier": "FULL_KYC"
+    },
+    "merchant": {
+      "merchantId": "MERCH-TRI-88",
+      "merchantName": "LuxeHome Direct Discounts",
+      "merchantCategory": "Designer Furniture & Appliances",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Windows 10 Firefox 125",
+      "deviceType": "desktop",
+      "os": "Windows",
+      "browser": "Firefox",
+      "ipSubnet": "104.244.72.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "16720",
+      "card2": "380",
+      "card3": "150",
+      "card4": "mastercard",
+      "card5": "224",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 6,
+      "d1_d15_delta": 0.04,
+      "v_anomaly_score": 0.86,
+      "initialBankModelRiskScore": 0.81
+    }
+  },
+  "typology": "Merchant Collusion & Triangulation",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Merchant LuxeHome Direct has a 76% chargeback ratio over past 14 days. Transaction amount $2,890 deviates from customer profile.",
+      "score": 0.81
+    },
+    "assessment": {
+      "initial_risk_score": 0.81,
+      "final_risk_score": 0.97,
+      "confidence_score": 97,
+      "initial_uncertainty": 35,
+      "final_uncertainty": 2,
+      "predicted_typology": "Merchant Collusion & Triangulation"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Pattern matches triangulation scheme: Fake online shop receives cash orders, buys real goods using stolen credit cards.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Shipping address is a notorious freight-forwarding warehouse in Miami exporting to Eastern Europe.",
+        "evidence": [
+          "Shipping address is freight forwarder",
+          "Cardholder lives 2,000 miles away in Denver",
+          "Merchant has 76% dispute rate"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Dispatching SMS verification with merchant name and shipping destination explicitly detailed.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Cardholder responded: 'NO! Never heard of LuxeHome, cancel immediately!'",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Cardholder spared $2,890 loss. Merchant merchant processor account flagged for closure.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "merchant_chargeback_centrality",
+        "description": "Compute high chargeback clustering on suspect online storefront",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Merchant> m) SYNTAX v2 {\n  Seed = {m};\n  Disputes = SELECT t FROM Seed:s -(PURCHASED_AT)- Transaction:t WHERE t.has_dispute == true;\n  PRINT Disputes.size();\n}",
+        "parameters": {
+          "m": "MERCH-TRI-88"
+        },
+        "execution_time_ms": 16,
+        "result_summary": "Merchant processed 38 transactions in 14 days, with 29 already resulting in unauthorized billing claims.",
+        "returned_vertices": 5,
+        "returned_edges": 8
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.84,
+      "community_cluster": "COMM-TRIANGULATION-1",
+      "nodes": [
+        {
+          "id": "MERCH-TRI-88",
+          "label": "LuxeHome Direct (Rogue Store)",
+          "type": "Merchant",
+          "riskScore": 0.98,
+          "properties": {
+            "dispute_rate": "76%",
+            "age_days": 28
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CUST-55198",
+          "label": "Clara Oswald (Victim Cardholder)",
+          "type": "Customer",
+          "riskScore": 0.12,
+          "properties": {
+            "residence": "Denver, CO"
+          }
+        },
+        {
+          "id": "CARD-16720",
+          "label": "Mastercard 16720",
+          "type": "Card",
+          "riskScore": 0.78,
+          "properties": {
+            "issuer": "Horizon"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "TXN-3889104",
+          "label": "TXN $2,890 (Espresso Machine)",
+          "type": "Transaction",
+          "riskScore": 0.81,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "SHIP-DROP-MIAMI",
+          "label": "Drop Ship Addr: Miami Freight Forwarder",
+          "type": "Device",
+          "riskScore": 0.95,
+          "properties": {
+            "category": "Freight Forwarder"
+          },
+          "isFlagged": true
+        }
+      ],
+      "edges": [
+        {
+          "id": "te1",
+          "source": "CARD-16720",
+          "target": "TXN-3889104",
+          "label": "CHARGED_FOR",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "te2",
+          "source": "TXN-3889104",
+          "target": "MERCH-TRI-88",
+          "label": "MERCHANT_TERMINAL",
+          "type": "PURCHASED_AT",
+          "isSuspicious": true
+        },
+        {
+          "id": "te3",
+          "source": "TXN-3889104",
+          "target": "SHIP-DROP-MIAMI",
+          "label": "DESTINATION_SHIPPING",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "te4",
+          "source": "CUST-55198",
+          "target": "CARD-16720",
+          "label": "OWNER",
+          "type": "LINKED_CARD"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Send SMS Cardholder Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "High risk merchant, but customer may have ordered genuine furniture. Validate shipping destination with cardholder.",
+    "initial_uncertainty_score": 35,
+    "policy_reference": "POL-001-STEP-UP"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-06",
+    "evidence_type": "CUSTOMER_SMS_VERIFY",
+    "policy_rule": "POL-001-STEP-UP",
+    "requested_details": "Confirm whether shipping address in Miami, FL is authorized by cardholder.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Customer replied: 'FRAUD - I live in Denver, have no connections in Miami. Please block.'",
+      "verifiedAt": "2026-08-11T16:22:15Z",
+      "confidenceDelta": 33
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Permanent Card Cancellation & Re-issue",
+    "approval_route": "Senior Fraud Operations Lead Approval",
+    "rationale": "Card compromised in triangulation scam. Block card, freeze merchant acquiring terminal, alert acquirer bank.",
+    "final_confidence_score": 97,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-006",
+    "filing_date": "2026-08-11",
+    "total_amount_at_risk": 109820,
+    "currency": "INR",
+    "primary_typology": "Merchant Collusion & Triangulation",
+    "law_enforcement_codes": [
+      "TRIANGULATION_FRAUD",
+      "FREIGHT_FORWARDING_EXPORT"
+    ],
+    "summary_narrative": "The subject merchant LuxeHome Direct operates a fraudulent triangulation scheme. Stolen payment cards are charged for high-end luxury goods which are routed through Miami freight forwarding entities for international re-export. Aggregated fraudulent transactions across the merchant terminal exceed Rs. 1,09,000 over 14 days.",
+    "graph_nexus": "TigerGraph merchant analysis revealed 29 victim cardholders connected to single Miami freight forwarder address.",
+    "chronology": [
+      "16:18:00Z - Rs. 2,890 charge submitted",
+      "16:18:50Z - Graph reveals freight forwarder destination",
+      "16:20:00Z - Cardholder SMS challenge dispatched",
+      "16:22:15Z - Customer confirms theft",
+      "16:25:00Z - Merchant network blocked across card portfolio"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M3-006",
+      "similarity_score": 0.93,
+      "typology": "Merchant Collusion & Triangulation"
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "case_id": "HHG-003",
+  "case_number": 3,
+  "benchmark_reference_id": "CASE-BENCH-03",
+  "title": "High-Value Rs. 3,450 Hotel Reservation with IP Mismatch",
+  "status": "RESOLVED",
+  "created_at": "2026-08-05T18:40:12Z",
+  "updated_at": "2026-08-05T18:44:20Z",
+  "transaction": {
+    "transaction_id": "TXN-3855209",
+    "amount": 3450,
+    "amount_inr": 3450,
+    "currency": "INR",
+    "timestamp": "2026-08-05T18:38:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-10492",
+      "name": "Sophia Chen, MD",
+      "accountAgeDays": 2890,
+      "historicalAvgTransactionUSD": 420,
+      "accountBalanceUSD": 89000,
+      "kycTier": "FULL_KYC"
+    },
+    "merchant": {
+      "merchantId": "MERCH-9941",
+      "merchantName": "The Savoy Hotel London",
+      "merchantCategory": "Luxury Lodging & Hospitality",
+      "merchantRiskLevel": "LOW"
+    },
+    "device": {
+      "deviceInfo": "iPhone 15 Pro iOS 17.5",
+      "deviceType": "mobile",
+      "os": "iOS",
+      "browser": "Mobile Safari",
+      "ipSubnet": "82.165.197.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": false
+    },
+    "card": {
+      "card1": "15432",
+      "card2": "490",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 2,
+      "d1_d15_delta": 0.8,
+      "v_anomaly_score": 0.69,
+      "initialBankModelRiskScore": 0.72
+    }
+  },
+  "typology": "Legitimate / Cleared False Positive",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Model score 0.72 triggered due to sudden cross-border location (Customer based in San Francisco; IP located in Central London UK).",
+      "score": 0.72
+    },
+    "assessment": {
+      "initial_risk_score": 0.72,
+      "final_risk_score": 0.08,
+      "confidence_score": 98,
+      "initial_uncertainty": 68,
+      "final_uncertainty": 2,
+      "predicted_typology": "Legitimate / Cleared False Positive"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "While geolocation is international, merchant is reputable 5-star hotel and card is Visa Infinite.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Hardware device fingerprint has been linked to Sophia Chen since 2023. IP is legitimate mobile cellular IP, not a proxy/Tor.",
+        "evidence": [
+          "Device has 3-year verified history",
+          "0 shared links to fraud rings",
+          "Legitimate Vodafone UK mobile gateway"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Hard blocking would inflict severe negative customer experience on a high-value private banking client. Applying POL-005 Safe Passage protocol.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Allows instantaneous confirmation without interrupting customer's check-in.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Risk score collapsed to 0.08. Uncertainty reduced to 2%. Releasing hold and appending travel itinerary.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "historical_device_trust",
+        "description": "Assess historical device longevity and previous international travel patterns",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Customer> c, VERTEX<Device> d) SYNTAX v2 {\n  Seed = {c};\n  Matched = SELECT d FROM Seed:s -(USED_DEVICE)- Device:d WHERE d.fingerprint == d.fingerprint;\n  PRINT Matched.size();\n}",
+        "parameters": {
+          "customer": "CUST-10492",
+          "device": "DEV-IPHONE"
+        },
+        "execution_time_ms": 9,
+        "result_summary": "Device fingerprint has 412 successful historical transactions over 3 years. Clean trust score.",
+        "returned_vertices": 2,
+        "returned_edges": 1
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.15,
+      "community_cluster": "COMM-VIP-GENUINE",
+      "nodes": [
+        {
+          "id": "CUST-10492",
+          "label": "Dr. Sophia Chen (Premier Client)",
+          "type": "Customer",
+          "riskScore": 0.02,
+          "properties": {
+            "tenure_years": 8,
+            "net_worth": "Tier 1"
+          }
+        },
+        {
+          "id": "CARD-15432",
+          "label": "Visa Infinite 15432",
+          "type": "Card",
+          "riskScore": 0.04,
+          "properties": {
+            "limit": 50000
+          }
+        },
+        {
+          "id": "TXN-3855209",
+          "label": "TXN $3,450.00",
+          "type": "Transaction",
+          "riskScore": 0.72,
+          "properties": {
+            "merchant": "The Savoy Hotel London"
+          }
+        },
+        {
+          "id": "DEV-IPHONE",
+          "label": "iPhone 15 Pro (Known Device 3 yrs)",
+          "type": "Device",
+          "riskScore": 0.01,
+          "properties": {
+            "biometric_enrolled": true
+          }
+        },
+        {
+          "id": "IP-LONDON",
+          "label": "82.165.197.10 (Vodafone UK Mobile)",
+          "type": "IPAddress",
+          "riskScore": 0.1,
+          "properties": {
+            "isp": "Vodafone UK"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "CUST-10492",
+          "target": "CARD-15432",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "e2",
+          "source": "CARD-15432",
+          "target": "TXN-3855209",
+          "label": "BILLED_TO",
+          "type": "INVOLVED_IN"
+        },
+        {
+          "id": "e3",
+          "source": "TXN-3855209",
+          "target": "DEV-IPHONE",
+          "label": "EXECUTED_ON",
+          "type": "USED_DEVICE"
+        },
+        {
+          "id": "e4",
+          "source": "TXN-3855209",
+          "target": "IP-LONDON",
+          "label": "ROUTED_VIA",
+          "type": "ASSOCIATED_IP"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Request Step-Up 3DS 2.0 Biometric Re-auth",
+    "approval_route": "Auto-Approved (Low Risk Tier 1)",
+    "rationale": "High model score due strictly to international IP; device is longstanding trusted hardware. Prompt 3DS re-auth rather than blocking.",
+    "initial_uncertainty_score": 68,
+    "policy_reference": "POL-005-FALSE-POSITIVE-CLEAR"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-03",
+    "evidence_type": "STEP_UP_BIOMETRIC",
+    "policy_rule": "POL-005-FALSE-POSITIVE-CLEAR",
+    "requested_details": "Authenticate transaction for $3,450 at The Savoy Hotel London.",
+    "response_outcome": {
+      "result": "VERIFIED_LEGITIMATE",
+      "details": "Customer authenticated via Apple Secure Enclave FaceID with cryptographically signed token.",
+      "verifiedAt": "2026-08-05T18:40:14Z",
+      "confidenceDelta": -66
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Allow Transaction & Close Case",
+    "approval_route": "Auto-Approved (Low Risk Tier 1)",
+    "rationale": "Identity verified via hardware biometrics. Allow transaction; auto-whitelist London IP subnet for next 14 days.",
+    "final_confidence_score": 98,
+    "final_uncertainty_score": 2,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": null,
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M2-004",
+      "similarity_score": 0.95,
+      "typology": "Legitimate / Cleared False Positive"
+    }
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "case_id": "HHG-001",
+  "case_number": 1,
+  "benchmark_reference_id": "CASE-BENCH-01",
+  "title": "Suspicious Rs. 4,850 Electronics Purchase via Unrecognized Device",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-02T14:22:10Z",
+  "updated_at": "2026-08-02T14:28:45Z",
+  "transaction": {
+    "transaction_id": "TXN-3829101",
+    "amount": 4850,
+    "amount_inr": 4850,
+    "currency": "INR",
+    "timestamp": "2026-08-02T14:20:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-88129",
+      "name": "Marcus Vance",
+      "accountAgeDays": 1420,
+      "historicalAvgTransactionUSD": 85.5,
+      "accountBalanceUSD": 14200,
+      "kycTier": "FULL_KYC"
+    },
+    "merchant": {
+      "merchantId": "MERCH-7712",
+      "merchantName": "Apex Digital Direct",
+      "merchantCategory": "Consumer Electronics & Crypto Hardware",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Windows 11 Chrome 124.0.0",
+      "deviceType": "desktop",
+      "os": "Windows",
+      "browser": "Chrome",
+      "ipSubnet": "185.220.101.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "13524",
+      "card2": "555",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 8,
+      "d1_d15_delta": 0.05,
+      "v_anomaly_score": 0.89,
+      "initialBankModelRiskScore": 0.84
+    }
+  },
+  "typology": "Account Takeover (ATO)",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Bank Model Risk Score 0.84 exceeded 0.80 threshold with geo-teleportation signal (Customer home: Chicago; Session IP: Frankfurt Tor Exit).",
+      "score": 0.84
+    },
+    "assessment": {
+      "initial_risk_score": 0.84,
+      "final_risk_score": 0.96,
+      "confidence_score": 96,
+      "initial_uncertainty": 42,
+      "final_uncertainty": 4,
+      "predicted_typology": "Account Takeover (ATO)"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Transaction amount is 56x customer's historical average. Origin IP is known Tor exit node.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Device fingerprint has never interacted with Marcus Vance before. However, the card details are authentic.",
+        "evidence": [
+          "Device fingerprint is new to customer",
+          "IP is Tor Exit Node AS60729",
+          "Amount is 56x historical average"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Bank Policy POL-001 mandates controlled evidence gathering before irreversible card blocking when uncertainty > 40%.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Awaiting customer validation response. Temporary 15-minute authorization hold applied.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty collapsed from 42% to 4%. ATO confirmed. Escalating to immediate permanent card block.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "find_shared_device_rings",
+        "description": "Traverse 2 hops from suspect device to identify shared credentials or compromised accounts",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Device> dev) SYNTAX v2 {\n  Seed = {dev};\n  Txns = SELECT t FROM Seed:s -(USED_DEVICE)- Transaction:t;\n  Cards = SELECT c FROM Txns:t -(LINKED_CARD)- Card:c;\n  PRINT Cards.size(), Txns.size();\n}",
+        "parameters": {
+          "dev": "DEV-SUSP-11"
+        },
+        "execution_time_ms": 14,
+        "result_summary": "Device previously seen across 3 failed authentication probes in last 24h against disparate cards.",
+        "returned_vertices": 4,
+        "returned_edges": 6
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 7,
+      "edges_count": 6,
+      "density_score": 0.68,
+      "community_cluster": "COMM-ATO-99",
+      "nodes": [
+        {
+          "id": "CUST-88129",
+          "label": "Marcus Vance (Victim)",
+          "type": "Customer",
+          "riskScore": 0.15,
+          "properties": {
+            "tenure_years": 4,
+            "credit_limit": 15000
+          }
+        },
+        {
+          "id": "ACC-54219",
+          "label": "Marcus Checking 54219",
+          "type": "Account",
+          "riskScore": 0.2,
+          "properties": {
+            "balance": 14200
+          }
+        },
+        {
+          "id": "CARD-13524",
+          "label": "Visa Signature 13524",
+          "type": "Card",
+          "riskScore": 0.35,
+          "properties": {
+            "bin": "13524",
+            "issuer": "First Horizon"
+          }
+        },
+        {
+          "id": "TXN-3829101",
+          "label": "TXN $4,850.00",
+          "type": "Transaction",
+          "riskScore": 0.84,
+          "properties": {
+            "amount": 4850,
+            "product": "W"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "DEV-SUSP-11",
+          "label": "Tor Desktop Linux/Win",
+          "type": "Device",
+          "riskScore": 0.95,
+          "properties": {
+            "fingerprint": "fp_98a72b",
+            "user_agent": "Chrome 124"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "IP-185-220",
+          "label": "185.220.101.44 (Frankfurt)",
+          "type": "IPAddress",
+          "riskScore": 0.98,
+          "properties": {
+            "is_tor": true,
+            "asn": "AS60729"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "MERCH-7712",
+          "label": "Apex Digital Direct",
+          "type": "Merchant",
+          "riskScore": 0.62,
+          "properties": {
+            "category": "Electronics",
+            "dispute_rate": "4.8%"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "CUST-88129",
+          "target": "ACC-54219",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "e2",
+          "source": "ACC-54219",
+          "target": "CARD-13524",
+          "label": "ISSUED_FOR",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "e3",
+          "source": "CARD-13524",
+          "target": "TXN-3829101",
+          "label": "USED_IN",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "e4",
+          "source": "TXN-3829101",
+          "target": "DEV-SUSP-11",
+          "label": "ORIGINATED_DEVICE",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "e5",
+          "source": "TXN-3829101",
+          "target": "IP-185-220",
+          "label": "CONNECTION_IP",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "e6",
+          "source": "TXN-3829101",
+          "target": "MERCH-7712",
+          "label": "DESTINATION",
+          "type": "PURCHASED_AT"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Hold Funds 24 Hours Pending Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "High risk score (0.84) and Tor IP, but unverified whether cardholder is traveling. Hold authorization and execute 3DS/SMS step-up.",
+    "initial_uncertainty_score": 42,
+    "policy_reference": "POL-001-STEP-UP"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-01",
+    "evidence_type": "CUSTOMER_SMS_VERIFY",
+    "policy_rule": "POL-001-STEP-UP",
+    "requested_details": "Verify $4,850 purchase at Apex Digital Direct from unrecognized Frankfurt device.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Customer explicitly responded: 'Fraud! My card is in my wallet in Chicago, I did not authorize Apex Digital.'",
+      "verifiedAt": "2026-08-02T14:23:45Z",
+      "confidenceDelta": 38
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Permanent Card Cancellation & Re-issue",
+    "approval_route": "Senior Fraud Operations Lead Approval",
+    "rationale": "Customer confirmed unauthorized compromise. Transaction rejected; card destroyed and re-issued; IP blacklisted in graph.",
+    "final_confidence_score": 96,
+    "final_uncertainty_score": 4,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-001",
+    "filing_date": "2026-08-02",
+    "total_amount_at_risk": 4850,
+    "currency": "INR",
+    "primary_typology": "Account Takeover (ATO)",
+    "law_enforcement_codes": [
+      "CYBER_ATO",
+      "IDENTITY_THEFT_CREDENTIAL"
+    ],
+    "summary_narrative": "On August 2, 2026, an unauthorized electronic commerce transaction of $4,850.00 was attempted against account holder Marcus Vance. The transaction originated via a known Tor exit node (185.220.101.44) using a new device fingerprint. Out-of-band verification confirmed account takeover. The transaction was intercepted with $0 loss. Full credentials invalidated.",
+    "graph_nexus": "TigerGraph community analysis identified DEV-SUSP-11 linked to 3 prior credential stuffing attempts across regional card BIN 13524.",
+    "chronology": [
+      "14:20:00Z - Transaction $4,850 attempted at Apex Digital Direct",
+      "14:20:05Z - Bank model score 0.84 triggers autonomous investigation",
+      "14:21:00Z - Agent requests out-of-band SMS/Push verification",
+      "14:23:45Z - Victim confirms unauthorized activity",
+      "14:24:10Z - Transaction voided, card cancelled, SAR drafted"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M1-001",
+      "similarity_score": 0.94,
+      "typology": "Account Takeover (ATO)"
+    }
+  ]
+}

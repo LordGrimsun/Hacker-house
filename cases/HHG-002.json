@@ -1,0 +1,315 @@
+{
+  "case_id": "HHG-002",
+  "case_number": 2,
+  "benchmark_reference_id": "CASE-BENCH-02",
+  "title": "Synthetic Identity Bust-Out Ring Across 4 Interconnected Accounts",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-04T09:15:00Z",
+  "updated_at": "2026-08-04T09:22:15Z",
+  "transaction": {
+    "transaction_id": "TXN-3840112",
+    "amount": 7200,
+    "amount_inr": 7200,
+    "currency": "INR",
+    "timestamp": "2026-08-04T09:12:30Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-SYN-04",
+      "name": "David K. Alvarez",
+      "accountAgeDays": 68,
+      "historicalAvgTransactionUSD": 45,
+      "accountBalanceUSD": 7500,
+      "kycTier": "SIMPLIFIED"
+    },
+    "merchant": {
+      "merchantId": "MERCH-3310",
+      "merchantName": "Prestige Bullion & Coins",
+      "merchantCategory": "Precious Metals & Liquidity",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "macOS 14.5 Safari 17.5",
+      "deviceType": "desktop",
+      "os": "macOS",
+      "browser": "Safari",
+      "ipSubnet": "73.189.44.0/24",
+      "geoMismatch": false,
+      "proxyOrVpnDetected": false
+    },
+    "card": {
+      "card1": "18201",
+      "card2": "321",
+      "card3": "150",
+      "card4": "mastercard",
+      "card5": "166",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 14,
+      "d1_d15_delta": 0.01,
+      "v_anomaly_score": 0.94,
+      "initialBankModelRiskScore": 0.88
+    }
+  },
+  "typology": "Synthetic Identity Ring",
+  "investigation_record": {
+    "trigger": {
+      "type": "GRAPH_RING_ALERT",
+      "description": "TigerGraph Louvain Community Detection flagged CUST-SYN-04 clustered with 3 other newly opened accounts sharing SSN prefix and address.",
+      "score": 0.88
+    },
+    "assessment": {
+      "initial_risk_score": 0.88,
+      "final_risk_score": 0.99,
+      "confidence_score": 99,
+      "initial_uncertainty": 28,
+      "final_uncertainty": 1,
+      "predicted_typology": "Synthetic Identity Ring"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Classic bust-out pattern: Account established, nurtured with micro-payments for 60 days, followed by sudden maximum liquidity drain.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Found 3 other active credit profiles sharing exact Commercial Mail Receiving Agency (CMRA) box and Mac hardware fingerprint.",
+        "evidence": [
+          "Shared CMRA mail drop with 3 accounts",
+          "Same Mac hardware UUID applied for 4 cards",
+          "SSN numbers match deceased individual sequence"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Policy POL-004 mandates freezing entire connected subgraph if shared attributes confirmed.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Legitimate customers can provide SSA-89 and live facial selfie; synthetic identities cannot.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Synthetic fraud confirmed beyond doubt. Uncertainty reduced to 1%. Immediate total ring collapse.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "synthetic_identity_clustering",
+        "description": "Identify multi-account clusters sharing commercial mail drop addresses and device hardware hashes",
+        "gsql_code": "INTERPRET QUERY () SYNTAX v2 {\n  Seed = {Customer.*};\n  CMRA = SELECT c FROM Seed:c -(ASSOCIATED_ADDR)- Address:a WHERE a.is_cmra == true;\n  PRINT CMRA.size();\n}",
+        "parameters": {
+          "address": "442 Commerce Blvd Ste 9"
+        },
+        "execution_time_ms": 22,
+        "result_summary": "Discovered 4 synthetic customer profiles opened within 60 days sharing 1 physical mail receiving agency.",
+        "returned_vertices": 7,
+        "returned_edges": 11
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 7,
+      "edges_count": 6,
+      "density_score": 0.88,
+      "community_cluster": "COMM-SYN-104",
+      "nodes": [
+        {
+          "id": "CUST-SYN-04",
+          "label": "David Alvarez (Synthetic)",
+          "type": "Customer",
+          "riskScore": 0.95,
+          "properties": {
+            "ssn_area": "987-65",
+            "kyc_tier": "Simplified"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CUST-SYN-02",
+          "label": "Elena Rostova (Linked Synthetic)",
+          "type": "Customer",
+          "riskScore": 0.92,
+          "properties": {
+            "ssn_area": "987-65"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CUST-SYN-03",
+          "label": "Julian Sterling (Linked Synthetic)",
+          "type": "Customer",
+          "riskScore": 0.9,
+          "properties": {
+            "ssn_area": "987-65"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "ADDR-DROP",
+          "label": "Drop Box: 442 Commerce Blvd Ste 9",
+          "type": "Device",
+          "riskScore": 0.98,
+          "properties": {
+            "type": "Mail Drop / CMRA"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "TXN-3840112",
+          "label": "TXN $7,200 (Gold Bullion)",
+          "type": "Transaction",
+          "riskScore": 0.94,
+          "properties": {
+            "amount": 7200
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CARD-18201",
+          "label": "Mastercard 18201",
+          "type": "Card",
+          "riskScore": 0.89,
+          "properties": {
+            "limit": 7500
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "DEV-SHARED-44",
+          "label": "Shared Mac Hardware Hash #M1-88",
+          "type": "Device",
+          "riskScore": 0.96,
+          "properties": {
+            "hardware_id": "hw_mac_88192"
+          },
+          "isFlagged": true
+        }
+      ],
+      "edges": [
+        {
+          "id": "se1",
+          "source": "CUST-SYN-04",
+          "target": "ADDR-DROP",
+          "label": "RESIDENTIAL_ADDR",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "se2",
+          "source": "CUST-SYN-02",
+          "target": "ADDR-DROP",
+          "label": "RESIDENTIAL_ADDR",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "se3",
+          "source": "CUST-SYN-03",
+          "target": "ADDR-DROP",
+          "label": "RESIDENTIAL_ADDR",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "se4",
+          "source": "CUST-SYN-04",
+          "target": "DEV-SHARED-44",
+          "label": "REGISTERED_DEVICE",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "se5",
+          "source": "CUST-SYN-02",
+          "target": "DEV-SHARED-44",
+          "label": "REGISTERED_DEVICE",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        },
+        {
+          "id": "se6",
+          "source": "CUST-SYN-04",
+          "target": "TXN-3840112",
+          "label": "EXECUTES",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Hold Funds 24 Hours Pending Verification",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "Hold gold bullion purchase while requesting certified identity documentation (SSA-89 / Real ID).",
+    "initial_uncertainty_score": 28,
+    "policy_reference": "POL-004-SYNTHETIC-RING"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-02",
+    "evidence_type": "ANALYST_CALL",
+    "policy_rule": "POL-004-SYNTHETIC-RING",
+    "requested_details": "Upload valid driver license and signed SSA-89 verification consent.",
+    "response_outcome": {
+      "result": "FAILED_CHALLENGE",
+      "details": "Provided forged documentation with duplicate serial number belonging to a deceased Florida resident.",
+      "verifiedAt": "2026-08-04T09:19:40Z",
+      "confidenceDelta": 45
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Freeze Account & Clawback Associated Transfers",
+    "approval_route": "Bank Secrecy Act (BSA) / Compliance Officer",
+    "rationale": "Confirmed synthetic fraud ring. Freeze all 4 cluster accounts, terminate $32,000 combined credit limits, file mandatory FinCEN SAR.",
+    "final_confidence_score": 99,
+    "final_uncertainty_score": 1,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-002",
+    "filing_date": "2026-08-04",
+    "total_amount_at_risk": 32400,
+    "currency": "INR",
+    "primary_typology": "Synthetic Identity Ring",
+    "law_enforcement_codes": [
+      "SYNTHETIC_IDENTITY",
+      "MAIL_FRAUD",
+      "ORGANIZED_CRIME"
+    ],
+    "summary_narrative": "Between June and August 2026, an organized synthetic identity ring manufactured at least four identities using randomized SSN sequences and a shared mail forwarding location in Delaware. The ring attempted a coordinated bust-out starting with a $7,200.00 bullion transaction by account David K. Alvarez. Graph traversal isolated all 4 accounts before cumulative exposure could be liquidated.",
+    "graph_nexus": "TigerGraph Louvain community #COMM-SYN-104 revealed 7 vertices tightly coupled via shared hardware hash and commercial drop box address.",
+    "chronology": [
+      "09:12:30Z - $7,200 bullion purchase attempted",
+      "09:13:30Z - TigerGraph algorithm detects shared CMRA mail drop with 3 other active cards",
+      "09:15:00Z - Agent triggers step-up KYC audit",
+      "09:19:40Z - Forged documentation detected",
+      "09:22:00Z - Entire 4-node account cluster frozen, credit lines cancelled"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M1-002",
+      "similarity_score": 0.97,
+      "typology": "Synthetic Identity Ring"
+    }
+  ]
+}

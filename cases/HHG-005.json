@@ -1,0 +1,289 @@
+{
+  "case_id": "HHG-005",
+  "case_number": 5,
+  "benchmark_reference_id": "CASE-BENCH-05",
+  "title": "Darknet Dump Stolen Card Burst: 9 Rapid Micro-Authorizations in 4 Minutes",
+  "status": "ACTION_RECOMMENDED",
+  "created_at": "2026-08-09T03:12:00Z",
+  "updated_at": "2026-08-09T03:18:10Z",
+  "transaction": {
+    "transaction_id": "TXN-3877991",
+    "amount": 1250,
+    "amount_inr": 1250,
+    "currency": "INR",
+    "timestamp": "2026-08-09T03:10:00Z",
+    "product_code": "C",
+    "customer": {
+      "customerId": "CUST-44120",
+      "name": "Arthur Pendelton",
+      "accountAgeDays": 910,
+      "historicalAvgTransactionUSD": 40,
+      "accountBalanceUSD": 5200,
+      "kycTier": "FULL_KYC"
+    },
+    "merchant": {
+      "merchantId": "MERCH-GAME-22",
+      "merchantName": "Global Gaming Currency Ltd",
+      "merchantCategory": "Digital Goods & In-Game Currency",
+      "merchantRiskLevel": "HIGH"
+    },
+    "device": {
+      "deviceInfo": "Linux Android Emulator BlueStacks",
+      "deviceType": "desktop",
+      "os": "Linux",
+      "browser": "Headless Chrome 122",
+      "ipSubnet": "194.26.29.0/24",
+      "geoMismatch": true,
+      "proxyOrVpnDetected": true
+    },
+    "card": {
+      "card1": "14109",
+      "card2": "202",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "credit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 28,
+      "d1_d15_delta": 0.001,
+      "v_anomaly_score": 0.98,
+      "initialBankModelRiskScore": 0.95
+    }
+  },
+  "typology": "Card Bust-Out & Stolen Card Velocity",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Risk score 0.95: 9 rapid authorization attempts within 240 seconds from an automated headless emulator.",
+      "score": 0.95
+    },
+    "assessment": {
+      "initial_risk_score": 0.95,
+      "final_risk_score": 0.99,
+      "confidence_score": 99,
+      "initial_uncertainty": 12,
+      "final_uncertainty": 1,
+      "predicted_typology": "Card Bust-Out & Stolen Card Velocity"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Headless Chrome User-Agent signature and rapid micro-charges indicate credential testing bot.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "The same VPS IP address attempted carding attacks on 14 other bank cards in the last 48 hours.",
+        "evidence": [
+          "Headless Chrome automation telemetry",
+          "VPS Datacenter IP 194.26.29.112",
+          "Micro-charge testing pattern preceding large burst"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Zero legitimate customer probability. Automated kill-switch authorization.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Carding script attempted 3 random CVVs before guessing correctly on attempt 4.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty 1%. Immediate card revocation and reissue.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "card_velocity_burst",
+        "description": "Compute rolling transaction count and merchant diversity within short time window",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Card> c) SYNTAX v2 {\n  Seed = {c};\n  Txns = SELECT t FROM Seed:s -(INVOLVED_IN)- Transaction:t WHERE datetime_diff(now(), t.timestamp) < 300;\n  PRINT Txns.size();\n}",
+        "parameters": {
+          "c": "CARD-14109"
+        },
+        "execution_time_ms": 11,
+        "result_summary": "9 authorization attempts detected in 240 seconds across 3 digital gaming merchants. Automated carding script signature.",
+        "returned_vertices": 7,
+        "returned_edges": 8
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 6,
+      "edges_count": 5,
+      "density_score": 0.92,
+      "community_cluster": "COMM-BOT-CARDING",
+      "nodes": [
+        {
+          "id": "EMULATOR-DEV-99",
+          "label": "BlueStacks Headless Bot",
+          "type": "Device",
+          "riskScore": 0.99,
+          "properties": {
+            "headless": true,
+            "user_agent": "HeadlessChrome"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "IP-194-26",
+          "label": "194.26.29.112 (Russian Hostinger VPS)",
+          "type": "IPAddress",
+          "riskScore": 0.97,
+          "properties": {
+            "host_type": "DataCenter / VPS"
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "CARD-14109",
+          "label": "Visa 14109 (Arthur Pendelton)",
+          "type": "Card",
+          "riskScore": 0.88,
+          "properties": {
+            "limit": 5000
+          },
+          "isFlagged": true
+        },
+        {
+          "id": "TXN-3877991",
+          "label": "TXN #9 ($1,250)",
+          "type": "Transaction",
+          "riskScore": 0.95,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "TXN-MICRO-1",
+          "label": "TXN #1 ($1.20 Steam)",
+          "type": "Transaction",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        },
+        {
+          "id": "TXN-MICRO-2",
+          "label": "TXN #2 ($1.00 Blizzard)",
+          "type": "Transaction",
+          "riskScore": 0.91,
+          "isFlagged": true,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "be1",
+          "source": "EMULATOR-DEV-99",
+          "target": "IP-194-26",
+          "label": "HOSTED_ON",
+          "type": "ASSOCIATED_IP",
+          "isSuspicious": true
+        },
+        {
+          "id": "be2",
+          "source": "CARD-14109",
+          "target": "TXN-MICRO-1",
+          "label": "TEST_AUTH",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be3",
+          "source": "CARD-14109",
+          "target": "TXN-MICRO-2",
+          "label": "TEST_AUTH",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be4",
+          "source": "CARD-14109",
+          "target": "TXN-3877991",
+          "label": "BURST_CHARGE",
+          "type": "INVOLVED_IN",
+          "isSuspicious": true
+        },
+        {
+          "id": "be5",
+          "source": "EMULATOR-DEV-99",
+          "target": "CARD-14109",
+          "label": "AUTOMATED_PROBE",
+          "type": "USED_DEVICE",
+          "isSuspicious": true
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Permanent Card Cancellation & Re-issue",
+    "approval_route": "Auto-Approved (Low Risk Tier 1)",
+    "rationale": "Bot attack in progress with multiple CVV failures and VPS origin. Immediate kill-switch to protect customer balance.",
+    "initial_uncertainty_score": 12,
+    "policy_reference": "POL-003-ACCOUNT-FREEZE"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-05",
+    "evidence_type": "DEVICE_GEO_PROBE",
+    "policy_rule": "POL-003-ACCOUNT-FREEZE",
+    "requested_details": "Query authorization engine for failed CVV attempts on card 14109.",
+    "response_outcome": {
+      "result": "CONFIRMED_FRAUD",
+      "details": "Gateway confirms 3 consecutive failed CVV mismatches prior to successful submission.",
+      "verifiedAt": "2026-08-09T03:11:55Z",
+      "confidenceDelta": 15
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Permanent Card Cancellation & Re-issue",
+    "approval_route": "Tier 1 Fraud Analyst Approval",
+    "rationale": "Brute-force carding verified. Terminate card, re-issue new PAN with dynamic CVV, block VPS IP across perimeter firewall.",
+    "final_confidence_score": 99,
+    "final_uncertainty_score": 1,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": {
+    "sar_id": "SAR-2026-BENCH-005",
+    "filing_date": "2026-08-09",
+    "total_amount_at_risk": 1250,
+    "currency": "INR",
+    "primary_typology": "Card Bust-Out & Stolen Card Velocity",
+    "law_enforcement_codes": [
+      "CYBER_BOTNET",
+      "CARD_FRAUD_VELOCITY"
+    ],
+    "summary_narrative": "On August 9, 2026, automated threat actors utilized a headless browser originating from VPS IP 194.26.29.112 to conduct a CVV brute-force attack against credit card ending in 14109. After three failed attempts, a $1,250.00 digital currency purchase was attempted. The agentic system recognized the bot pattern and severed the card before settlement.",
+    "graph_nexus": "TigerGraph pattern analysis linked the VPS IP to 14 prior credential stuffing incidents in Month 3.",
+    "chronology": [
+      "03:10:00Z - Bot begins micro-auth tests",
+      "03:10:05Z - Velocity score triggers agentic intervention",
+      "03:11:55Z - Gateway logs confirm CVV brute force",
+      "03:12:00Z - Card terminated, IP permanently blacklisted"
+    ]
+  },
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M2-003",
+      "similarity_score": 0.96,
+      "typology": "Card Bust-Out & Stolen Card Velocity"
+    }
+  ]
+}

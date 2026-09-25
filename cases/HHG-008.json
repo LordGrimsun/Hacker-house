@@ -1,0 +1,247 @@
+{
+  "case_id": "HHG-008",
+  "case_number": 8,
+  "benchmark_reference_id": "CASE-BENCH-08",
+  "title": "Student Laptop Purchase with New Credit Line (Uncertain Risk)",
+  "status": "RESOLVED",
+  "created_at": "2026-08-13T10:00:00Z",
+  "updated_at": "2026-08-13T10:07:30Z",
+  "transaction": {
+    "transaction_id": "TXN-3911368",
+    "amount": 1850,
+    "amount_inr": 1850,
+    "currency": "INR",
+    "timestamp": "2026-08-13T09:58:00Z",
+    "product_code": "W",
+    "customer": {
+      "customerId": "CUST-13296",
+      "name": "Liam O'Connor",
+      "accountAgeDays": 1200,
+      "historicalAvgTransactionUSD": 380,
+      "accountBalanceUSD": 4625,
+      "kycTier": "FULL_KYC"
+    },
+    "merchant": {
+      "merchantId": "MERCH-8008",
+      "merchantName": "Campus Tech Store",
+      "merchantCategory": "Legitimate / Cleared False Positive",
+      "merchantRiskLevel": "LOW"
+    },
+    "device": {
+      "deviceInfo": "Apple iPhone 15 Pro",
+      "deviceType": "mobile",
+      "os": "iOS",
+      "browser": "Mobile Safari",
+      "ipSubnet": "71.212.18.0/24",
+      "geoMismatch": false,
+      "proxyOrVpnDetected": false
+    },
+    "card": {
+      "card1": "14488",
+      "card2": "321",
+      "card3": "150",
+      "card4": "visa",
+      "card5": "226",
+      "card6": "debit"
+    },
+    "vesta_signals": {
+      "c1_c14_velocity": 2,
+      "d1_d15_delta": 1.2,
+      "v_anomaly_score": 0.68,
+      "initialBankModelRiskScore": 0.68
+    }
+  },
+  "typology": "Legitimate / Cleared False Positive",
+  "investigation_record": {
+    "trigger": {
+      "type": "RISK_SCORE_THRESHOLD",
+      "description": "Anomaly score 0.68 exceeded policy threshold for typology: Legitimate / Cleared False Positive.",
+      "score": 0.68
+    },
+    "assessment": {
+      "initial_risk_score": 0.68,
+      "final_risk_score": 0.05,
+      "confidence_score": 99,
+      "initial_uncertainty": 65,
+      "final_uncertainty": 1,
+      "predicted_typology": "Legitimate / Cleared False Positive"
+    },
+    "steps": [
+      {
+        "step": 1,
+        "stage": "TRIGGER",
+        "reasoning": "Triggered policy threshold for Legitimate / Cleared False Positive. Initiating TigerGraph investigation.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 2,
+        "stage": "GRAPH_TRAVERSAL",
+        "reasoning": "Graph topology reveals longstanding trusted client profile.",
+        "evidence": [
+          "Known trusted device fingerprint",
+          "Clean historical credit record",
+          "No common edges with fraud clusters"
+        ],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 3,
+        "stage": "UNCERTAINTY",
+        "reasoning": "Gathering controlled evidence to reach defensible legal threshold.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 4,
+        "stage": "EVIDENCE_GATHERING",
+        "reasoning": "Awaiting customer authentication feedback.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      },
+      {
+        "step": 5,
+        "stage": "ACTION_SYNTHESIS",
+        "reasoning": "Uncertainty resolved. Executing Allow Transaction & Close Case. Graph memory updated.",
+        "evidence": [],
+        "gsql_query_used": null,
+        "execution_time_ms": 12
+      }
+    ],
+    "gsql_queries": [
+      {
+        "query_name": "subgraph_neighborhood_expansion",
+        "description": "Expand 2-hop neighborhood to discover connected entities and shared fraud markers",
+        "gsql_code": "INTERPRET QUERY (VERTEX<Transaction> t) SYNTAX v2 {\n  Seed = {t};\n  Connected = SELECT v FROM Seed:s -(INVOLVED_IN|USED_DEVICE|ASSOCIATED_IP)- :v;\n  PRINT Connected.size();\n}",
+        "parameters": {
+          "t": "TXN-8"
+        },
+        "execution_time_ms": 13,
+        "result_summary": "Traversed 2 hops in TigerGraph. Found isolated clean personal KYC graph.",
+        "returned_vertices": 5,
+        "returned_edges": 4
+      }
+    ],
+    "graph_subnetwork": {
+      "nodes_count": 5,
+      "edges_count": 4,
+      "density_score": 0.12,
+      "community_cluster": "COMM-BENCH-8",
+      "nodes": [
+        {
+          "id": "CUST-8",
+          "label": "Liam O'Connor",
+          "type": "Customer",
+          "riskScore": 0.03,
+          "properties": {
+            "name": "Liam O'Connor"
+          }
+        },
+        {
+          "id": "CARD-8",
+          "label": "Card 8",
+          "type": "Card",
+          "riskScore": 0.02,
+          "properties": {}
+        },
+        {
+          "id": "TXN-8",
+          "label": "TXN $1,850",
+          "type": "Transaction",
+          "riskScore": 0.68,
+          "isFlagged": false,
+          "properties": {
+            "amount": 1850
+          }
+        },
+        {
+          "id": "DEV-8",
+          "label": "Device #D-8",
+          "type": "Device",
+          "riskScore": 0.01,
+          "isFlagged": false,
+          "properties": {}
+        },
+        {
+          "id": "MERCH-8",
+          "label": "Campus Tech Store",
+          "type": "Merchant",
+          "riskScore": 0.05,
+          "properties": {}
+        }
+      ],
+      "edges": [
+        {
+          "id": "be-8-1",
+          "source": "CUST-8",
+          "target": "CARD-8",
+          "label": "OWNS",
+          "type": "LINKED_CARD"
+        },
+        {
+          "id": "be-8-2",
+          "source": "CARD-8",
+          "target": "TXN-8",
+          "label": "BILLED",
+          "type": "INVOLVED_IN",
+          "isSuspicious": false
+        },
+        {
+          "id": "be-8-3",
+          "source": "TXN-8",
+          "target": "DEV-8",
+          "label": "ACCESSED_BY",
+          "type": "USED_DEVICE",
+          "isSuspicious": false
+        },
+        {
+          "id": "be-8-4",
+          "source": "TXN-8",
+          "target": "MERCH-8",
+          "label": "PAID_TO",
+          "type": "PURCHASED_AT"
+        }
+      ]
+    }
+  },
+  "next_best_action_before_evidence": {
+    "recommended_action": "Request Step-Up 3DS 2.0 Biometric Re-auth",
+    "approval_route": "Auto-Approved (Low Risk Tier 1)",
+    "rationale": "Signal uncertainty requires controlled evidence collection before permanent action.",
+    "initial_uncertainty_score": 65,
+    "policy_reference": "POL-005-FALSE-POSITIVE-CLEAR"
+  },
+  "controlled_evidence_gathering": {
+    "evidence_action_id": "EVID-08",
+    "evidence_type": "STEP_UP_BIOMETRIC",
+    "policy_rule": "POL-005-FALSE-POSITIVE-CLEAR",
+    "requested_details": "Verify transaction authorization and device legitimacy.",
+    "response_outcome": {
+      "result": "VERIFIED_LEGITIMATE",
+      "details": "Student verified biometric face scan via mobile banking app in 15 seconds.",
+      "verifiedAt": "2026-08-13T10:02:15Z",
+      "confidenceDelta": -60
+    }
+  },
+  "next_best_action_after_evidence": {
+    "recommended_action": "Allow Transaction & Close Case",
+    "approval_route": "Auto-Approved (Low Risk Tier 1)",
+    "rationale": "Evidence confirmed status as VERIFIED_LEGITIMATE. Final next best action executed in compliance with policy.",
+    "final_confidence_score": 99,
+    "final_uncertainty_score": 1,
+    "action_status": "EXECUTED"
+  },
+  "suspicious_activity_report": null,
+  "graph_memory_persisted": true,
+  "similar_historical_cases_referenced": [
+    {
+      "case_id": "MEM-M1-004",
+      "similarity_score": 0.91,
+      "typology": "Legitimate / Cleared False Positive"
+    }
+  ]
+}
